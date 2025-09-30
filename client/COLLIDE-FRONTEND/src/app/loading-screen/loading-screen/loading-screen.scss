@@ -1,0 +1,46 @@
+/* src/app/loading-screen/loading-screen/loading-screen.scss */
+
+// No need to import anything! CSS custom properties are globally available.
+// The theming service applies .theme-dark or .theme-light to <body>
+// which makes all CSS variables available throughout the app.
+
+.loading-screen {
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  
+  .loading-content {
+    text-align: center;
+    
+    h1 {
+      color: var(--color-primary);
+      margin-bottom: 1rem;
+    }
+    
+    p {
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+    }
+
+    button {
+      background-color: var(--color-primary-button-bg);
+      color: var(--color-primary-button-text);
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+
+      &:hover {
+        background-color: var(--color-accent);
+      }
+
+     
+    }
+  }
+}
+

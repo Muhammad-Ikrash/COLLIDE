@@ -1,51 +1,145 @@
 /* src/styles/_themes.scss */
 
 // ----------------------
-// A. DARK THEME (COLLIDE Default)
+// A. DARK THEME (COLLIDE Default: Purple/Orange/Black)
 // ----------------------
-// Applies to :root (default) AND when the body has the .theme-dark class
 :root, .theme-dark {
-  // Backgrounds
-  --bg-main: #1e1e1e;
-  --bg-sidebar: #252526;
-  --bg-input: #333333;
-  --bg-card: #2c2c2e;
+  // -------------------------------------------------------------------
+  // A. BACKGROUNDS:
+  // -------------------------------------------------------------------
+  --bg-main: #0d0d0d;           // Very dark base for main app area
+  --bg-sidebar: #1f1f1f;        // Slightly lighter than main for contrast
+  --bg-card: #282828;           // Used for raised elements like project cards
+  --bg-input: #333333;          // Dark background for all text fields
+  --bg-dropdown: #2c2c2c;       // Background for drop-down menus
+  --bg-tooltip: #444444;        // Darker, subtle background for tooltips
+  --bg-form: #1f1f1f;           // Background for forms/ login / signup panels
+  
+  // -------------------------------------------------------------------
+  // B. IDE-SPECIFIC BACKGROUNDS:
+  // -------------------------------------------------------------------
+  --bg-ide: #1e1e1e;            // Standard IDE editor dark background
+  --bg-terminal: #1a1a1a;       // Slightly different for terminal/console separation
+  --bg-file-tab-bar: #181818;   // Background for the file tabs bar
+  --bg-chat-box: #1f1f1f;       // Chat area background
+  
+  // -------------------------------------------------------------------
+  // C. TEXT & TYPOGRAPHY:
+  // -------------------------------------------------------------------
+  --text-primary: #f4f4f4;         // White/Light Gray for main content
+  --text-primary-unselected: #cccccc;   // Slightly dimmed primary text
+  --text-secondary: #a9a9a9;       // For usernames, file sizes, etc.
+  --text-muted: #696969;             // For placeholders and helper text
+  --text-link: #6a0dad;           // Links should use the brand color
+  --text-terminal: #ffffff;             // Pure white text for terminal readability
 
-  // Text
-  --text-primary: #d4d4d4; // Light gray text
-  --text-muted: #808080;
-
-  // Primary UI / Accent
-  --color-primary: #007acc; // VSCode blue
-  --color-accent: #005f99; // Lighter blue for highlights
-  --color-success: #6c9a3e;
-  --color-danger: #cf6766;
-
-  // Borders
-  --border-color: #3f3f46;
+  // -------------------------------------------------------------------
+  // D. UI COLORS (Interactive/Status):
+  // -------------------------------------------------------------------
+  --color-primary: #6a0dad;     // Primary color for selected state, main buttons
+  --color-accent: #ff6a00;     // Highlight color (active tab indicator, focus ring)
+  --color-success: #388e3c;           // Standard green
+  --color-danger: #d32f2f;            // Standard red
+  --color-warning: #ff6a00;    // Orange for warnings/unsaved changes
+  
+  // -------------------------------------------------------------------
+  // X. FORM SUBMIT BUTTONS
+  // -------------------------------------------------------------------
+  --color-primary-button-bg: #6a0dad;          
+  --color-primary-button-text: #ffffff;                
+  --color-secondary-button-bg: #444444;              
+  --color-secondary-button-text: #ffffff;              
+  --color-primary-button-disabled-bg: #4a335a;        // Muted purple
+  --color-primary-button-disabled-text: #999999;       
+  --color-secondary-button-disabled-bg: #333333;      
+  --color-secondary-button-disabled-text: #666666;      
+  
+  // -------------------------------------------------------------------
+  // E. BORDERS, SEPARATORS, & SHADOWS:
+  // -------------------------------------------------------------------
+  --border-color-primary: #3b3b3b;       // Main borders (panels, inputs)
+  --border-color-secondary: #5a5a5a;     // Thicker, more prominent borders (card outlines)
+  --border-color-tertiary: #2f2f2f;      // Subtle dividers
+  --separator-color-primary: #3b3b3b;   // Strong separator lines
+  --separator-color-secondary: #2f2f2f; // Low-emphasis separators
+  --shadow-color: rgba(0, 0, 0, 0.5);    // Dark shadow color
+  
+  // -------------------------------------------------------------------
+  // F. INTERACTIVE STATES:
+  // -------------------------------------------------------------------
+  --color-hover-bg: #363636;        // Background for hover over list items
+  --color-selected-bg: #404040;     // Background for a fully selected/highlighted item
+  --color-active-tab: #ff6a00; // Active file tab indicator line
 }
 
 // ----------------------
 // B. LIGHT THEME
 // ----------------------
-// Applies when the body has the .theme-light class
 .theme-light {
-  // Backgrounds (Inverted/Light)
-  --bg-main: #f3f3f3;
-  --bg-sidebar: #ffffff;
-  --bg-input: #e4e4e4;
+  // -------------------------------------------------------------------
+  // A. BACKGROUNDS:
+  // -------------------------------------------------------------------
+  --bg-main: #ffffff;
+  --bg-sidebar: #f5f5f5;
   --bg-card: #ffffff;
+  --bg-input: #ffffff;
+  --bg-dropdown: #ffffff;
+  --bg-tooltip: #121212;
+  --bg-form: #fafafa;
+  
+  // -------------------------------------------------------------------
+  // B. IDE-SPECIFIC BACKGROUNDS:
+  // -------------------------------------------------------------------
+  --bg-ide: #ffffff;
+  --bg-terminal: #fafafa;
+  --bg-file-tab-bar: #f5f5f5;
+  --bg-chat-box: #ffffff;
+  
+  // -------------------------------------------------------------------
+  // C. TEXT & TYPOGRAPHY:
+  // -------------------------------------------------------------------
+  --text-primary: #121212;
+  --text-primary-unselected: #424242;
+  --text-secondary: #757575;
+  --text-muted: #9e9e9e;
+  --text-link: #6a0dad;
+  --text-terminal: #121212;
 
-  // Text (Darker)
-  --text-primary: #1f2022;
-  --text-muted: #6a6a6a;
-
-  // Primary UI / Accent (Can stay the same or be adjusted for contrast)
-  --color-primary: #007acc;
-  --color-accent: #005f99;
+  // -------------------------------------------------------------------
+  // D. UI COLORS:
+  // -------------------------------------------------------------------
+  --color-primary: #6a0dad;
+  --color-accent: #ff6a00;
   --color-success: #388e3c;
   --color-danger: #d32f2f;
-
-  // Borders
-  --border-color: #d1d1d1;
+  --color-warning: #ff6a00;
+  
+  // -------------------------------------------------------------------
+  // E. FORM SUBMIT BUTTONS:
+  // -------------------------------------------------------------------
+  --color-primary-button-bg: #6a0dad;
+  --color-primary-button-text: #ffffff;
+  --color-secondary-button-bg: #e0e0e0;
+  --color-secondary-button-text: #121212;
+  --color-primary-button-disabled-bg: #e1bee7;
+  --color-primary-button-disabled-text: #9e9e9e;
+  --color-secondary-button-disabled-bg: #f5f5f5;
+  --color-secondary-button-disabled-text: #bdbdbd;
+  
+  // -------------------------------------------------------------------
+  // F. BORDERS, SEPARATORS, & SHADOWS:
+  // -------------------------------------------------------------------
+  --border-color-primary: #e0e0e0;
+  --border-color-secondary: #bdbdbd;
+  --border-color-tertiary: #f0f0f0;
+  --separator-color-primary: #e0e0e0;
+  --separator-color-secondary: #f0f0f0;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  
+  // -------------------------------------------------------------------
+  // G. INTERACTIVE STATES:
+  // -------------------------------------------------------------------
+  --color-hover-bg: #f5f5f5;
+  --color-selected-bg: #e8f5e8;
+  --color-active-tab: #ff6a00;
 }

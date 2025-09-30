@@ -1,25 +1,71 @@
-/* src/styles/_colors.scss */
+/* src/styles/_colors.scss - Variable Definitions Only */
 
-// Define the names of the CSS variables globally.
-// We use :root to ensure they are available everywhere.
+// This file only contains variable names and comments.
+// Actual values are set in _themes.scss based on theme classes.
 
-:root {
-  // Backgrounds
-  --bg-main: initial;           // The main editor/app background
-  --bg-sidebar: initial;        // Sidebar, file explorer background
-  --bg-input: initial;          // Text fields, search bars
-  --bg-card: initial;           // General card/panel backgrounds
+// -------------------------------------------------------------------
+// A. BACKGROUNDS: Used for the main structure and panels
+// -------------------------------------------------------------------
+// --bg-main: The main application background (behind sidebars/editor)
+// --bg-sidebar: Background for the File Explorer, Chat Sidebar, etc.
+// --bg-card: General card/panel backgrounds (e.g., project list items)
+// --bg-input: Background for text input fields and search bars
+// --bg-dropdown: Background for dropdown menus, context menus
+// --bg-tooltip: Background for small helper text boxes (tooltips)
+// --bg-form: Background for forms/ login / signup panels
 
-  // Text
-  --text-primary: initial;      // Main content text
-  --text-muted: initial;        // Secondary text (timestamps, placeholders)
+// -------------------------------------------------------------------
+// B. IDE-SPECIFIC BACKGROUNDS: For the core Workspace
+// -------------------------------------------------------------------
+// --bg-ide: The background color for the code editor area itself (Monaco)
+// --bg-terminal: The background color for the integrated terminal panel
+// --bg-file-tab-bar: Background for the bar holding the file tabs
+// --bg-chat-box: Background for the main chat message display area
 
-  // Primary UI / Accent
-  --color-primary: initial;     // Brand color (buttons, links)
-  --color-accent: initial;      // Highlight/Active color (e.g., active file tab)
-  --color-success: initial;     // Run Code button, success messages
-  --color-danger: initial;      // Delete, error messages
+// -------------------------------------------------------------------
+// C. TEXT & TYPOGRAPHY: Colors for all forms of text
+// -------------------------------------------------------------------
+// --text-primary: Main content text color (standard readability)
+// --text-primary-unselected: Less prominent primary text (e.g., inactive file tabs)
+// --text-secondary: Less prominent text (e.g., usernames, timestamps, file size)
+// --text-muted: Highly muted text (placeholders, disabled fields)
+// --text-link: Color for clickable text links
+// --text-terminal: Text color specifically for the terminal panel
 
-  // Borders & Separators
-  --border-color: initial;
-}
+// -------------------------------------------------------------------
+// D. UI COLORS: Interactive elements, status, and feedback
+// -------------------------------------------------------------------
+// --color-primary: Primary brand color (main buttons, active selections)
+// --color-accent: Secondary brand color, used for strong highlights (e.g., active cursor line)
+// --color-success: Color for success states (e.g., Run Code button, save success)
+// --color-danger: Color for destructive actions (e.g., Delete, Error messages)
+// --color-warning: Color for warnings (e.g., unsaved changes)
+
+// -------------------------------------------------------------------
+// E. FORM SUBMIT BUTTONS
+// -------------------------------------------------------------------
+// --color-primary-button-bg: Background for primary action buttons (e.g., Submit, Save)
+// --color-primary-button-text: Text color for primary action buttons
+// --color-secondary-button-bg: Background for secondary action buttons (e.g., Cancel)
+// --color-secondary-button-text: Text color for secondary action buttons
+// --color-primary-button-disabled-bg: Background for disabled primary buttons
+// --color-primary-button-disabled-text: Text color for disabled primary buttons
+// --color-secondary-button-disabled-bg: Background for disabled secondary buttons
+// --color-secondary-button-disabled-text: Text color for disabled secondary buttons
+
+// -------------------------------------------------------------------
+// F. BORDERS, SEPARATORS, & SHADOWS:
+// -------------------------------------------------------------------
+// --border-color-primary: Color for thin lines separating panels or inputs
+// --border-color-secondary: Color for thicker borders (e.g., around cards, input focus)
+// --border-color-tertiary: Color for the lowest emphasis borders (e.g., dividers)
+// --separator-color-primary: Color for dividing lines inside panels (e.g., between chat messages)
+// --separator-color-secondary: Color for less prominent separators (e.g., between file list items)
+// --shadow-color: Color used for subtle box shadows on raised elements
+
+// -------------------------------------------------------------------
+// G. INTERACTIVE STATES: Hover, Active, Selected
+// -------------------------------------------------------------------
+// --color-hover-bg: Background color for elements on mouse hover (e.g., file list item)
+// --color-selected-bg: Background color for a selected element (e.g., active file in explorer)
+// --color-active-tab: Color for the active file tab indicator line

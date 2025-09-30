@@ -1,1 +1,21 @@
-/* You can add global styles to this file, and also import other style files */
+/* src/styles.scss */
+
+// 1. Import your color variable definitions and theme values
+@import 'styles/colors';
+@import 'styles/themes';
+
+// 2. Global Resets and Base Styles
+* {
+    box-sizing: border-box;
+}
+
+body {
+    // CRITICAL: Use CSS variables here, which resolve to the currently active theme values
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    margin: 0;
+    padding: 0;
+    transition: background-color 0.3s, color 0.3s; // Smooth transition between themes
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+}

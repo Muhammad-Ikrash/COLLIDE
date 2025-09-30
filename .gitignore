@@ -20,6 +20,9 @@ node_modules
 /client/*/node_modules
 /node_modules
 
+#package.json in client root
+/client/package.json
+
 # Build artifacts
 /client/angular-app/dist/
 /client/electron/dist/

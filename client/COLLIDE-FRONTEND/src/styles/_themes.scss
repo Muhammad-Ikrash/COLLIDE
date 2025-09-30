@@ -1,0 +1,51 @@
+/* src/styles/_themes.scss */
+
+// ----------------------
+// A. DARK THEME (COLLIDE Default)
+// ----------------------
+// Applies to :root (default) AND when the body has the .theme-dark class
+:root, .theme-dark {
+  // Backgrounds
+  --bg-main: #1e1e1e;
+  --bg-sidebar: #252526;
+  --bg-input: #333333;
+  --bg-card: #2c2c2e;
+
+  // Text
+  --text-primary: #d4d4d4; // Light gray text
+  --text-muted: #808080;
+
+  // Primary UI / Accent
+  --color-primary: #007acc; // VSCode blue
+  --color-accent: #005f99; // Lighter blue for highlights
+  --color-success: #6c9a3e;
+  --color-danger: #cf6766;
+
+  // Borders
+  --border-color: #3f3f46;
+}
+
+// ----------------------
+// B. LIGHT THEME
+// ----------------------
+// Applies when the body has the .theme-light class
+.theme-light {
+  // Backgrounds (Inverted/Light)
+  --bg-main: #f3f3f3;
+  --bg-sidebar: #ffffff;
+  --bg-input: #e4e4e4;
+  --bg-card: #ffffff;
+
+  // Text (Darker)
+  --text-primary: #1f2022;
+  --text-muted: #6a6a6a;
+
+  // Primary UI / Accent (Can stay the same or be adjusted for contrast)
+  --color-primary: #007acc;
+  --color-accent: #005f99;
+  --color-success: #388e3c;
+  --color-danger: #d32f2f;
+
+  // Borders
+  --border-color: #d1d1d1;
+}

@@ -1,0 +1,25 @@
+/* src/styles/_colors.scss */
+
+// Define the names of the CSS variables globally.
+// We use :root to ensure they are available everywhere.
+
+:root {
+  // Backgrounds
+  --bg-main: initial;           // The main editor/app background
+  --bg-sidebar: initial;        // Sidebar, file explorer background
+  --bg-input: initial;          // Text fields, search bars
+  --bg-card: initial;           // General card/panel backgrounds
+
+  // Text
+  --text-primary: initial;      // Main content text
+  --text-muted: initial;        // Secondary text (timestamps, placeholders)
+
+  // Primary UI / Accent
+  --color-primary: initial;     // Brand color (buttons, links)
+  --color-accent: initial;      // Highlight/Active color (e.g., active file tab)
+  --color-success: initial;     // Run Code button, success messages
+  --color-danger: initial;      // Delete, error messages
+
+  // Borders & Separators
+  --border-color: initial;
+}

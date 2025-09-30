@@ -1,0 +1,19 @@
+// src/styles/_mixins.scss
+
+// Mixin for standardizing the layout of a feature panel (e.g., sidebar, terminal)
+@mixin panel-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: var(--bg-sidebar);
+    border: 1px solid var(--border-color);
+    // Optional: Add a subtle box shadow
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+// Mixin for standardizing responsive design breakpoints
+@mixin on-desktop {
+    @media (min-width: 1200px) {
+        @content;
+    }
+}

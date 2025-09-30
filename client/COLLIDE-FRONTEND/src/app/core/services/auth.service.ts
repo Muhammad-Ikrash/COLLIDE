@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 
 const AUTH_TOKEN_KEY = 'jwt_token'; 
+// 3 2  4 4 4 7 8 5
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -27,6 +28,14 @@ export class AuthService {
         this._isLoggedIn.next(tokenExists); // Always update the state
         return true; // Temporary fix
         return tokenExists; 
+    }
+
+    /**
+     * Gets the JWT token from localStorage for use in HTTP requests.
+     * Used by the AuthInterceptor to attach tokens to API calls.
+     */
+    public getToken(): string | null {
+        return localStorage.getItem(AUTH_TOKEN_KEY);
     }
     
     // --- MOCK METHODS FOR TESTING ROUTING FLOW ---

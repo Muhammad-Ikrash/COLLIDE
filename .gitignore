@@ -21,7 +21,7 @@ node_modules
 /node_modules
 
 #package.json in client root
-/client/package.json
+#/client/package.json
 
 # Build artifacts
 /client/angular-app/dist/

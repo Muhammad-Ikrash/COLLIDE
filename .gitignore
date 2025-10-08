@@ -44,3 +44,6 @@ build/
 *.app
 *.zip
 *.tar.gz
+
+.vscode
+.idea

@@ -1,1 +1,46 @@
 <p>login works!</p>
+<div class="login-background">
+  <div>
+    <h1 class="main-heading">CodeForge IDE</h1>
+    <p class="sub-heading">Professional Development Environment</p>
+
+    <div class="tabs">
+      <button 
+        class="tab-button active" 
+        (click)="setTab('login')">Login</button>
+      <button 
+        class="tab-button" 
+        (click)="setTab('signup')">Sign Up</button>
+    </div>
+
+    <form (ngSubmit)="onLogin()" #loginForm="ngForm" *ngIf="selectedTab === 'login'">
+      <div class="input-group">
+        <label for="email">Email</label>
+        <input 
+          type="email" 
+          id="email" 
+          name="email" 
+          [(ngModel)]="email"
+          required 
+          placeholder="Enter your email"
+        />
+      </div>
+
+      <div class="input-group">
+        <label for="password">Password</label>
+        <input 
+          type="password" 
+          id="password" 
+          name="password" 
+          [(ngModel)]="password"
+          required 
+          placeholder="Enter your password"
+        />
+      </div>
+
+      <button type="submit" [disabled]="!loginForm.valid" class="login-btn">
+        Sign In
+      </button>
+    </form>
+  </div>
+</div>

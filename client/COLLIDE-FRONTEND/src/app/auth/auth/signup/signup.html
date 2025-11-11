@@ -1,1 +1,49 @@
-<p>signup works!</p>
+<div class="signup-background">
+    <div>
+        <h1 class="main-heading">CodeForge IDE</h1>
+        <p class="sub-heading">professional Development Environment</p>
+        <div class="tabs">
+            <button class="tab-button"(click)="setTab('Login')">Login</button>
+            <button class="tab-button.active" (click)="setTab('signup')">Sign Up</button>
+        </div>
+        <form (ngSubmit)="onSignUp()" #signupForm="ngForm" *ngif="selectedTab===signup">
+            <div class="input-group">
+                <label for="email">Email</label>
+                <input
+                type="email"
+                id="email"
+                name="email"
+                [(ngModel)]="email"
+                required
+                placeholder="Enter your Email"
+                />
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input 
+                type="password"
+                id="password"
+                name="password"
+                [(ngModel)]="password"
+                required
+                placeholder="Enter Your Password"
+                />
+            </div>
+            <div class="input-group">
+                <label for="reEnterPassword">Re-Enter Password</label>
+                <input
+                type="password"
+                id="reEnterPassword"
+                name="reEnterPassword"
+                [(ngModel)]="reEnterPassword"
+                required
+                placeholder="Please re-enter your password"
+                />
+            </div>
+            <button type="submit" [disabled]="!signupForm.valid" class="signup-btn">
+                Sign Up
+            </button>
+        </form>
+
+    </div>
+</div>

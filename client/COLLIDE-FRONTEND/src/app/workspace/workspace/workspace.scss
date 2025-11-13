@@ -41,10 +41,12 @@ $ide-width: calc(100% - #{$file-explorer-width} - #{$chat-sidebar-width});
     position: fixed;
     top: $workspace-header-height;
     left: 0;
+    color: white;
     bottom: $ide-footer-height;
     width: $file-explorer-width;
     background-color: var(--bg-file-explorer);
     border: 2px solid var(--border-default);
+    overflow: auto;
 }
 
 .file-tabs{

@@ -4,72 +4,31 @@
 // A. DARK THEME (COLLIDE Default: Purple/Orange/Black)
 // ----------------------
 :root, .theme-dark {
-  // -------------------------------------------------------------------
-  // A. BACKGROUNDS:
-  // -------------------------------------------------------------------
-  --bg-main: #0d0d0d;           // Very dark base for main app area
-  --bg-sidebar: #1f1f1f;        // Slightly lighter than main for contrast
-  --bg-card: #282828;           // Used for raised elements like project cards
-  --bg-input: #333333;          // Dark background for all text fields
-  --bg-dropdown: #2c2c2c;       // Background for drop-down menus
-  --bg-tooltip: #444444;        // Darker, subtle background for tooltips
-  --bg-form: #1f1f1f;           // Background for forms/ login / signup panels
-  
-  // -------------------------------------------------------------------
-  // B. IDE-SPECIFIC BACKGROUNDS:
-  // -------------------------------------------------------------------
-  --bg-ide: #1e1e1e;            // Standard IDE editor dark background
-  --bg-terminal: #1a1a1a;       // Slightly different for terminal/console separation
-  --bg-file-tab-bar: #181818;   // Background for the file tabs bar
-  --bg-chat-box: #1f1f1f;       // Chat area background
-  
-  // -------------------------------------------------------------------
-  // C. TEXT & TYPOGRAPHY:
-  // -------------------------------------------------------------------
-  --text-primary: #f4f4f4;         // White/Light Gray for main content
-  --text-primary-unselected: #cccccc;   // Slightly dimmed primary text
-  --text-secondary: #a9a9a9;       // For usernames, file sizes, etc.
-  --text-muted: #696969;             // For placeholders and helper text
-  --text-link: #6a0dad;           // Links should use the brand color
-  --text-terminal: #ffffff;             // Pure white text for terminal readability
+ 
+  --bg-main: #000000;
+  --bg-main-alt: #030712;
+  --bg-form-card: #101828;
+  --bg-form-input: #1E2939;
 
-  // -------------------------------------------------------------------
-  // D. UI COLORS (Interactive/Status):
-  // -------------------------------------------------------------------
-  --color-primary: #6a0dad;     // Primary color for selected state, main buttons
-  --color-accent: #ff6a00;     // Highlight color (active tab indicator, focus ring)
-  --color-success: #388e3c;           // Standard green
-  --color-danger: #d32f2f;            // Standard red
-  --color-warning: #ff6a00;    // Orange for warnings/unsaved changes
+  --purple-color: #673AB7;
+  --orange-color: #FF5722;
+
+  --button-orange: #FF5722;
+  --button-orange-disabled: #f7744c;
+  --button-purple: #673AB7;
+  --button-purple-disabled: #9a7fdc;
+
+  --text-white: #FFFFFF;
+  --text-button-disabled-white: #CCCCCC;
+  --text-light-gray: #B0B0B0;
+
+  --tab-active: #673AB7;
+  --tab-inactive: var(--bg-main-alt);
   
-  // -------------------------------------------------------------------
-  // X. FORM SUBMIT BUTTONS
-  // -------------------------------------------------------------------
-  --color-primary-button-bg: #6a0dad;          
-  --color-primary-button-text: #ffffff;                
-  --color-secondary-button-bg: #444444;              
-  --color-secondary-button-text: #ffffff;              
-  --color-primary-button-disabled-bg: #4a335a;        // Muted purple
-  --color-primary-button-disabled-text: #999999;       
-  --color-secondary-button-disabled-bg: #333333;      
-  --color-secondary-button-disabled-text: #666666;      
+  --border-default: #454952;
   
-  // -------------------------------------------------------------------
-  // E. BORDERS, SEPARATORS, & SHADOWS:
-  // -------------------------------------------------------------------
-  --border-color-primary: #3b3b3b;       // Main borders (panels, inputs)
-  --border-color-secondary: #5a5a5a;     // Thicker, more prominent borders (card outlines)
-  --border-color-tertiary: #2f2f2f;      // Subtle dividers
-  --separator-color-primary: #3b3b3b;   // Strong separator lines
-  --separator-color-secondary: #2f2f2f; // Low-emphasis separators
-  --shadow-color: rgba(0, 0, 0, 0.5);    // Dark shadow color
   
-  // -------------------------------------------------------------------
-  // F. INTERACTIVE STATES:
-  // -------------------------------------------------------------------
-  --color-hover-bg: #363636;        // Background for hover over list items
-  --color-selected-bg: #404040;     // Background for a fully selected/highlighted item
-  --color-active-tab: #ff6a00; // Active file tab indicator line
+  
 }
 
 // ----------------------

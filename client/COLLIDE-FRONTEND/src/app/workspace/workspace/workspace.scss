@@ -1,0 +1,86 @@
+$workspace-header-height:7%;
+$chat-sidebar-width:17%;
+$file-explorer-width:13%;
+$file-tabs-height:7%;
+$file-tabs-width:70%;
+
+$ide-footer-height:5%;
+$terminal-height:35%;
+$terminal-width:70%;
+$ide-height: calc(100% - #{$workspace-header-height} - #{$file-tabs-height} - #{$ide-footer-height})   ;
+$ide-width: calc(100% - #{$file-explorer-width} - #{$chat-sidebar-width});
+
+.workspace-container{
+    background-color: var(--bg-main-alt);
+    height: 100%;
+}
+
+.workspace-header{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: $workspace-header-height;
+    background-color: var(--bg-header);
+    border: 2px solid var(--border-default);
+}
+
+
+
+.chat-sidebar{
+    position: fixed;
+    top: $workspace-header-height;
+    right: 0;
+    bottom: $ide-footer-height;
+    width: $chat-sidebar-width;
+    background-color: var(--bg-sidebar);
+    border: 2px solid var(--border-default);
+}
+
+.file-explorer{
+    position: fixed;
+    top: $workspace-header-height;
+    left: 0;
+    bottom: $ide-footer-height;
+    width: $file-explorer-width;
+    background-color: var(--bg-file-explorer);
+    border: 2px solid var(--border-default);
+}
+
+.file-tabs{
+    position: fixed;
+    top: $workspace-header-height;
+    left: $file-explorer-width;
+    height: $file-tabs-height;
+    width: $file-tabs-width;
+    background-color: var(--bg-file-tabs);
+    border: 2px solid var(--border-default);
+}
+
+.ide-editor{
+    position: fixed;
+    top: calc(#{$workspace-header-height} + #{$file-tabs-height});
+    left: $file-explorer-width;
+    height: $ide-height;
+    width: $ide-width;
+    background-color: var(--bg-editor);
+    border: 2px solid var(--border-default);
+}
+
+.ide-footer{
+    position: fixed;
+    bottom: 0;
+    height: $ide-footer-height;
+    width: 100%;
+    background-color: var(--bg-footer);
+    border: 2px solid var(--border-default);
+}
+.terminal{
+    position: fixed;
+    bottom: $ide-footer-height;
+    height: $terminal-height;
+    left: $file-explorer-width;
+    width: $terminal-width;
+    background-color: var(--bg-terminal);
+    border: 2px solid var(--border-default);
+}

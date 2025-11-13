@@ -61,7 +61,7 @@ $ide-width: calc(100% - #{$file-explorer-width} - #{$chat-sidebar-width});
     position: fixed;
     top: calc(#{$workspace-header-height} + #{$file-tabs-height});
     left: $file-explorer-width;
-    height: $ide-height;
+    bottom: calc(#{$ide-footer-height} + #{$terminal-height})   ;
     width: $ide-width;
     background-color: var(--bg-editor);
     border: 2px solid var(--border-default);

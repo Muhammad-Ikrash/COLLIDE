@@ -13,6 +13,11 @@ export const routes: Routes = [
     component: LoadingScreen,
     // No guard here, as this component's ngOnInit does the initial check.
   },
+  // Static route so the loading screen can be opened directly during dev/testing
+  {
+    path: 'loading',
+    component: LoadingScreen,
+  },
   
   // 2. Auth Feature (Lazy Loaded)
   {

@@ -1,7 +1,8 @@
 .editor-wrapper {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  /* constrained to parent (.ide-editor) height instead of viewport */
+  height: 100%;
   background: #1e1e1e;
   color: #ccc;
   font-family: monospace;
@@ -11,5 +12,5 @@
   flex: 1;
   border: 1px solid #444;
   border-radius: 6px;
-  overflow: hidden; /* allow scrolling when content overflows */
+  overflow: auto; /* allow scrolling when content overflows */
 }

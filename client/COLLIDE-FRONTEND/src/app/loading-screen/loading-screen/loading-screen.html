@@ -1,15 +1,16 @@
 <div class="loading-screen">
   <div class="loading-content">
-    <h1>COLLIDE</h1>
-    <p>Loading your collaborative IDE...</p>
-    
-    <!-- Temporary theme toggle for testing (remove later) -->
+    <div class="logo" aria-hidden="true">
+      <span class="word coll"><span class="inner">COLL</span></span>
+      <span class="word ide"><span class="inner">IDE</span></span>
+    </div>
+
+    <p class="loading-sub">Loading your collaborative IDE...</p>
+
+    <!-- Temporary theme toggle for testing (keep or remove later) -->
     <button 
       (click)="toggleTheme()" 
-      style="margin-top: 2rem; padding: 0.5rem 1rem; 
-             background: var(--color-primary); 
-             color: var(--color-primary-button-text);
-             border: none; border-radius: 4px; cursor: pointer;">
+      class="theme-toggle">
       Toggle Theme (Current: {{ themingService.getCurrentTheme() }})
     </button>
   </div>

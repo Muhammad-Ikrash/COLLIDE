@@ -77,6 +77,102 @@ public class FileTreeController {
         }
     }
 
+    @PostMapping("/delete")
+    public ResponseEntity<?> deletePath(@RequestBody java.util.Map<String, String> body) {
+        try {
+            String pathStr = body.get("path");
+            if (pathStr == null) {
+                return ResponseEntity.badRequest().body(java.util.Map.of("error", "path required"));
+            }
+            Path p = Paths.get(pathStr).toAbsolutePath().normalize();
+            Path root = Paths.get(ROOT).toAbsolutePath().normalize();
+            if (!p.startsWith(root)) {
+                return ResponseEntity.status(403).body(java.util.Map.of("error", "Access denied"));
+            }
+            if (!Files.exists(p)) {
+                return ResponseEntity.status(404).body(java.util.Map.of("error", "Not found"));
+            }
+
+            // recursive delete for directories
+            if (Files.isDirectory(p)) {
+                try (java.util.stream.Stream<Path> walk = Files.walk(p)) {
+                    walk.sorted(java.util.Comparator.reverseOrder()).forEach((pp) -> {
+                        try {
+                            Files.deleteIfExists(pp);
+                        } catch (Exception ex) {
+                            /* ignore individual delete errors */ }
+                    });
+                }
+            } else {
+                Files.deleteIfExists(p);
+            }
+            return ResponseEntity.ok(java.util.Map.of("path", p.toString()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(java.util.Map.of("error", e.toString()));
+        }
+    }
+
+    @PostMapping("/rename")
+    public ResponseEntity<?> renamePath(@RequestBody java.util.Map<String, String> body) {
+        try {
+            String oldPath = body.get("oldPath");
+            String newPath = body.get("newPath");
+            if (oldPath == null || newPath == null) {
+                return ResponseEntity.badRequest().body(java.util.Map.of("error", "oldPath and newPath required"));
+            }
+            Path oldP = Paths.get(oldPath).toAbsolutePath().normalize();
+            Path newP = Paths.get(newPath).toAbsolutePath().normalize();
+            Path root = Paths.get(ROOT).toAbsolutePath().normalize();
+            if (!oldP.startsWith(root) || !newP.startsWith(root)) {
+                return ResponseEntity.status(403).body(java.util.Map.of("error", "Access denied"));
+            }
+            if (!Files.exists(oldP)) {
+                return ResponseEntity.status(404).body(java.util.Map.of("error", "Not found"));
+            }
+
+            Files.createDirectories(newP.getParent());
+            Files.move(oldP, newP, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            return ResponseEntity.ok(java.util.Map.of("oldPath", oldP.toString(), "newPath", newP.toString()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(java.util.Map.of("error", e.toString()));
+        }
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<?> createPath(@RequestBody java.util.Map<String, String> body) {
+        try {
+            String parent = body.get("parent");
+            String name = body.get("name");
+            if (parent == null || name == null) {
+                return ResponseEntity.badRequest().body(java.util.Map.of("error", "parent and name required"));
+            }
+            Path parentP = Paths.get(parent).toAbsolutePath().normalize();
+            Path root = Paths.get(ROOT).toAbsolutePath().normalize();
+            if (!parentP.startsWith(root)) {
+                return ResponseEntity.status(403).body(java.util.Map.of("error", "Access denied"));
+            }
+            if (!Files.exists(parentP) || !Files.isDirectory(parentP)) {
+                return ResponseEntity.status(404).body(java.util.Map.of("error", "Parent not found or not a directory"));
+            }
+
+            // if name has a dot, treat as file, else treat as folder
+            boolean isFile = name.contains(".");
+            Path newP = parentP.resolve(name).toAbsolutePath().normalize();
+            if (!newP.startsWith(root)) {
+                return ResponseEntity.status(403).body(java.util.Map.of("error", "Access denied"));
+            }
+            if (isFile) {
+                Files.createDirectories(newP.getParent());
+                Files.writeString(newP, "", java.nio.charset.StandardCharsets.UTF_8, java.nio.file.StandardOpenOption.CREATE_NEW);
+            } else {
+                Files.createDirectories(newP);
+            }
+            return ResponseEntity.ok(java.util.Map.of("path", newP.toString(), "type", isFile ? "file" : "folder"));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(java.util.Map.of("error", e.toString()));
+        }
+    }
+
     private FileNode nodeForPath(Path p) {
         try {
             boolean isDir = Files.isDirectory(p);

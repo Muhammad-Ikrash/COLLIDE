@@ -3,6 +3,7 @@ import { Subject, debounceTime, filter, merge, Subscription } from 'rxjs';
 import { changesDT } from './data.type';
 import { EditorComponent } from "ngx-monaco-editor-v2";
 import { FileExplorerService } from '../../../core/services/fileexplorer.service';
+import { CursorService } from '../../../core/services/cursor.service';
 
 // change tracking queue (kept separate)
 let changesQueue: changesDT[] = [];
@@ -36,7 +37,7 @@ export class IdeEditor implements AfterViewInit, OnDestroy {
   private outgoing$ = merge(this.debounced$, this.immediate$);
   private subs: Subscription[] = [];
 
-  constructor(private fes: FileExplorerService) {}
+  constructor(private fes: FileExplorerService, private cursorService: CursorService) {}
 
   async ngAfterViewInit(): Promise<void> {
     try {
@@ -92,6 +93,16 @@ export class IdeEditor implements AfterViewInit, OnDestroy {
       const last = changesQueue[changesQueue.length - 1];
       if (last) this.contentChanges$.next(last.text);
     });
+
+    // update cursor position for footer
+    if (this.editorInstance && typeof this.editorInstance.onDidChangeCursorPosition === 'function') {
+      this.editorInstance.onDidChangeCursorPosition((e: any) => {
+        try {
+          const pos = e.position || e.target && e.target.position;
+          if (pos) this.cursorService.setPosition(pos.lineNumber || pos.line, pos.column || pos.columnNumber || pos.column);
+        } catch (err) { /* ignore */ }
+      });
+    }
 
     // save pipeline
     this.subs.push(this.outgoing$.subscribe(() => {

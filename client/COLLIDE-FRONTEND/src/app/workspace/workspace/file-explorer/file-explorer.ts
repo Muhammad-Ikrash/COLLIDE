@@ -1,4 +1,5 @@
-import { Component, signal, Input, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, signal, Input, Inject, PLATFORM_ID, Output, EventEmitter } from '@angular/core';
+import { FileExplorerService } from '../../../core/services/fileexplorer.service';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
@@ -19,10 +20,10 @@ type TreeNode = {
   <div class="node" [attr.data-id]="node.id">
     <span class="arrow" (click)="onToggle(node)">{{ node.type === 'folder' ? (isExpanded(node.id) ? '▾' : '▸') : '' }}</span>
     <span class="icon">{{ iconFor(node) }}</span>
-    <span class="label">{{ node.name }}</span>
+    <span class="label" (click)="onClick(node)">{{ node.name }}</span>
   </div>
   <div class="children" *ngIf="node.children?.length && isExpanded(node.id)">
-    <file-node *ngFor="let c of node.children" [node]="c" [level]="level + 1"></file-node>
+    <file-node *ngFor="let c of node.children" [node]="c" [level]="level + 1" (open)="onChildOpen($event)"></file-node>
   </div>
   `,
   styles: [
@@ -37,6 +38,7 @@ type TreeNode = {
 export class FileNodeComponent {
   @Input() node!: TreeNode;
   @Input() level = 0;
+  @Output() open = new EventEmitter<{ path: string; name?: string }>();
 
   isExpanded(id: string) {
     if (typeof window === 'undefined') {
@@ -51,6 +53,21 @@ export class FileNodeComponent {
     if (typeof window === 'undefined') return;
     const cmp: any = (window as any).__fileTreeComponentInstance;
     if (cmp) cmp.toggle(node.id);
+  }
+
+  onClick(node: TreeNode) {
+    if (node.type !== 'file') return;
+    // Prefer Angular event emission path
+    this.open.emit({ path: node.path, name: node.name });
+    // fallback to global window hook for older codepaths
+    if (typeof window === 'undefined') return;
+    const cmp: any = (window as any).__fileTreeComponentInstance;
+    if (cmp && typeof cmp.open === 'function') cmp.open(node.path, node.name);
+  }
+
+  onChildOpen(payload: { path: string; name?: string }) {
+    // bubble child open events upward
+    this.open.emit(payload);
   }
 
   iconFor(n: TreeNode) {
@@ -74,7 +91,7 @@ export class FileNodeComponent {
   imports: [CommonModule, HttpClientModule, FileNodeComponent],
   template: `
   <div class="tree-root" *ngIf="tree() as t; else loading">
-    <file-node [node]="t" [level]="0"></file-node>
+    <file-node [node]="t" [level]="0" (open)="open($event.path,$event.name)"></file-node>
   </div>
   <ng-template #loading><div>Loading file tree…</div></ng-template>
   `,
@@ -88,11 +105,20 @@ export class FileTreeComponent {
   tree = signal<TreeNode | null>(null);
   expanded = signal(new Set<string>());
 
-  constructor(private http: HttpClient, @Inject(PLATFORM_ID) private platformId: Object) {
+  constructor(private http: HttpClient, @Inject(PLATFORM_ID) private platformId: Object, private fes: FileExplorerService) {
     // expose global reference for the small demo recursion helper only in browser
     if (isPlatformBrowser(this.platformId)) {
       (window as any).__fileTreeComponentInstance = this;
       this.load();
+    }
+  }
+
+  open(path: string, name?: string) {
+    // forwarded to FileExplorerService; in some builds the DI token might be different, so guard
+    try {
+      if (this.fes && typeof this.fes.openFile === 'function') this.fes.openFile(path, name);
+    } catch (err) {
+      console.warn('Failed to open file via FileExplorerService', err);
     }
   }
 

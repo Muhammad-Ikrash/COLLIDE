@@ -97,11 +97,25 @@ export class FileTreeComponent {
   }
 
   load() {
-    // Use absolute backend URL so dev-server origin doesn't have to proxy /api
-    const url = 'http://localhost:3000/api/tree';
-    this.http.get<TreeNode>(url).subscribe((t) => this.tree.set(t), (err) => {
-      console.error('Failed to load file tree from', url, err);
-    });
+    // Try the Spring Boot backend on 8080 first, then fall back to legacy dev server on 3000
+    const tryUrls = [
+      'http://localhost:8080/api/tree',
+      'http://localhost:3000/api/tree'
+    ];
+
+    const tryNext = (index: number) => {
+      if (index >= tryUrls.length) {
+        console.error('All attempts to load file tree failed');
+        return;
+      }
+      const url = tryUrls[index];
+      this.http.get<TreeNode>(url).subscribe((t) => this.tree.set(t), (err) => {
+        console.warn('Failed to load file tree from', url, ' — trying next. Error:', err?.message || err);
+        tryNext(index + 1);
+      });
+    };
+
+    tryNext(0);
   }
 
   isExpanded = (id: string) => this.expanded().has(id);

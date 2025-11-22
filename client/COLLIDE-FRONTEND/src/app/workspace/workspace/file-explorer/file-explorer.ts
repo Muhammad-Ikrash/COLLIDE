@@ -1,7 +1,7 @@
-import { Component, signal, Input, Inject, PLATFORM_ID, Output, EventEmitter } from '@angular/core';
+import { Component, signal, Input, Inject, PLATFORM_ID, Output, EventEmitter, OnInit } from '@angular/core';
 import { FileExplorerService } from '../../../core/services/fileexplorer.service';
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClientModule } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 
 type TreeNode = {
@@ -47,13 +47,15 @@ type TreeNode = {
   styles: [
     `
     :host { display:block }
-    .node { display:flex; align-items:center; gap:6px; user-select:none }
-    .arrow { width:18px; display:inline-flex; justify-content:center; cursor:pointer }
-    .children { margin-left: 12px; }
+    .node { display:flex; align-items:center; gap:6px; user-select:none; padding: 2px 0; cursor: pointer; }
+    .node:hover { background: rgba(255,255,255,0.05); }
+    .arrow { width:18px; display:inline-flex; justify-content:center; cursor:pointer; color: #888; }
+    .children { margin-left: 12px; border-left: 1px solid rgba(255,255,255,0.05); }
     .context-menu { position: fixed; z-index: 2200; background: var(--bg-context, #222); color: var(--fg, #eee); border: 1px solid rgba(255,255,255,0.06); padding: 8px; border-radius: 6px; box-shadow: 0 6px 18px rgba(0,0,0,0.6); }
     .cm-actions { display:flex; flex-direction:column; gap:6px }
-    .cm-btn { background: transparent; color: inherit; border: 1px solid rgba(255,255,255,0.04); padding:6px 8px; border-radius:4px; cursor:pointer }
-    .cm-rename input, .cm-create input { padding:6px; border-radius:4px; border:1px solid rgba(255,255,255,0.04); margin-bottom:6px }
+    .cm-btn { background: transparent; color: inherit; border: 1px solid rgba(255,255,255,0.04); padding:6px 8px; border-radius:4px; cursor:pointer; text-align: left; }
+    .cm-btn:hover { background: rgba(255,255,255,0.1); }
+    .cm-rename input, .cm-create input { padding:6px; border-radius:4px; border:1px solid rgba(255,255,255,0.04); margin-bottom:6px; background: #333; color: white; }
   `,
   ],
 })
@@ -83,7 +85,7 @@ export class FileNodeComponent {
   onToggle(node: TreeNode) {
     if (typeof window === 'undefined') return;
     const cmp: any = (window as any).__fileTreeComponentInstance;
-    if (cmp) cmp.toggle(node.id);
+    if (cmp) cmp.toggle(node);
   }
 
   onContextMenu(ev: MouseEvent, node: TreeNode) {
@@ -143,16 +145,10 @@ export class FileNodeComponent {
 
   onClick(node: TreeNode) {
     if (node.type !== 'file') return;
-    // Prefer Angular event emission path
     this.open.emit({ path: node.path, name: node.name });
-    // fallback to global window hook for older codepaths
-    if (typeof window === 'undefined') return;
-    const cmp: any = (window as any).__fileTreeComponentInstance;
-    if (cmp && typeof cmp.open === 'function') cmp.open(node.path, node.name);
   }
 
   onChildOpen(payload: { path: string; name?: string }) {
-    // bubble child open events upward
     this.open.emit(payload);
   }
 
@@ -187,39 +183,63 @@ export class FileNodeComponent {
   selector: 'app-file-explorer',
   standalone: true,
   imports: [CommonModule, HttpClientModule, FileNodeComponent],
-  template: `
-  <div class="tree-root" *ngIf="tree() as t; else loading">
-    <file-node [node]="t" [level]="0"
-      (open)="open($event.path,$event.name)"
-      (rename)="onRename($event)"
-      (delete)="onDelete($event)"
-      (create)="onCreate($event)"
-    ></file-node>
-  </div>
-  <ng-template #loading><div>Loading file tree…</div></ng-template>
-  `,
+  templateUrl: './file-explorer.html',
   styles: [
     `
-    .tree-root { font-family: var(--font, Arial); }
+    .file-explorer-container { height: 100%; display: flex; flex-direction: column; }
+    .empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #888; }
+    .empty-state button { margin-top: 10px; padding: 8px 16px; background: #007acc; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    .tree-content { flex: 1; overflow-y: auto; }
+    .tree-root { font-family: var(--font, Arial); padding: 10px; }
   `,
   ],
 })
-export class FileTreeComponent {
+export class FileTreeComponent implements OnInit {
   tree = signal<TreeNode | null>(null);
   expanded = signal(new Set<string>());
+  rootPath: string | null = null;
 
-  constructor(private http: HttpClient, @Inject(PLATFORM_ID) private platformId: Object, private fes: FileExplorerService) {
-    // expose global reference for the small demo recursion helper only in browser
+  constructor(@Inject(PLATFORM_ID) private platformId: Object, private fes: FileExplorerService) {
     if (isPlatformBrowser(this.platformId)) {
       (window as any).__fileTreeComponentInstance = this;
-      this.load();
     }
+  }
+
+  ngOnInit() {
+    this.fes.rootPath$.subscribe(path => {
+      this.rootPath = path;
+      if (path) {
+        this.loadRoot(path);
+      }
+    });
+  }
+
+  openFolder() {
+    this.fes.openFolder();
+  }
+
+  async loadRoot(path: string) {
+    const children = await this.fes.getTree(path);
+    const rootNode: TreeNode = {
+      id: path,
+      name: path.split(/[\\/]/).pop() || path,
+      path: path,
+      type: 'folder',
+      children: children
+    };
+    this.tree.set(rootNode);
+    // Expand root by default
+    this.expanded.update(set => {
+        const newSet = new Set(set);
+        newSet.add(rootNode.id);
+        return newSet;
+    });
   }
 
   async onRename(e: { path: string; newName: string }) {
     try {
       await this.fes.renamePath(e.path, e.newName);
-      this.load();
+      if (this.rootPath) this.loadRoot(this.rootPath); // simplistic reload
     } catch (err) {
       console.error('Rename failed', err);
       alert('Rename failed: ' + ((err as any)?.message || err));
@@ -229,7 +249,7 @@ export class FileTreeComponent {
   async onDelete(e: { path: string }) {
     try {
       await this.fes.deletePath(e.path);
-      this.load();
+      if (this.rootPath) this.loadRoot(this.rootPath);
     } catch (err) {
       console.error('Delete failed', err);
       alert('Delete failed: ' + ((err as any)?.message || err));
@@ -239,11 +259,8 @@ export class FileTreeComponent {
   async onCreate(e: { parent: string; name: string }) {
     try {
       const res: any = await this.fes.createInParent(e.parent, e.name);
-      console.debug('Create result', res);
-      // reload tree and open file if created
-      this.load();
+      if (this.rootPath) this.loadRoot(this.rootPath);
       if (res && res.type === 'file' && res.path) {
-        // open created file in a new tab
         this.open(res.path, res.path.split(/\\|\//).pop());
       }
     } catch (err) {
@@ -253,7 +270,6 @@ export class FileTreeComponent {
   }
 
   open(path: string, name?: string) {
-    // forwarded to FileExplorerService; in some builds the DI token might be different, so guard
     try {
       if (this.fes && typeof this.fes.openFile === 'function') this.fes.openFile(path, name);
     } catch (err) {
@@ -261,33 +277,21 @@ export class FileTreeComponent {
     }
   }
 
-  load() {
-    // Try the Spring Boot backend on 8080 first, then fall back to legacy dev server on 3000
-    const tryUrls = [
-      'http://localhost:8080/api/tree',
-      'http://localhost:3000/api/tree'
-    ];
-
-    const tryNext = (index: number) => {
-      if (index >= tryUrls.length) {
-        console.error('All attempts to load file tree failed');
-        return;
-      }
-      const url = tryUrls[index];
-      this.http.get<TreeNode>(url).subscribe((t) => this.tree.set(t), (err) => {
-        console.warn('Failed to load file tree from', url, ' — trying next. Error:', err?.message || err);
-        tryNext(index + 1);
-      });
-    };
-
-    tryNext(0);
-  }
-
   isExpanded = (id: string) => this.expanded().has(id);
 
-  toggle(id: string) {
+  async toggle(node: TreeNode) {
+    const id = node.id;
     const set = new Set(this.expanded());
-    if (set.has(id)) set.delete(id); else set.add(id);
+    if (set.has(id)) {
+      set.delete(id);
+    } else {
+      set.add(id);
+      // Lazy load children if not present
+      if (!node.children || node.children.length === 0) {
+          const children = await this.fes.getTree(node.path);
+          node.children = children;
+      }
+    }
     this.expanded.set(set);
   }
 }

@@ -1,6 +1,5 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { Injectable, NgZone } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 
 export type OpenedFile = {
   id: string; // use path as id
@@ -8,6 +7,21 @@ export type OpenedFile = {
   name: string;
   content: string;
 };
+
+declare global {
+  interface Window {
+    electronAPI: {
+      selectFolder: () => Promise<string | null>;
+      readDirectory: (path: string) => Promise<any[]>;
+      readFile: (path: string) => Promise<string>;
+      writeFile: (path: string, content: string) => Promise<void>;
+      createFile: (parent: string, name: string) => Promise<any>;
+      createFolder: (parent: string, name: string) => Promise<any>;
+      deletePath: (path: string) => Promise<void>;
+      renamePath: (oldPath: string, newPath: string) => Promise<void>;
+    };
+  }
+}
 
 @Injectable({ providedIn: 'root' })
 export class FileExplorerService {
@@ -17,60 +31,46 @@ export class FileExplorerService {
   private activeFileSubject = new BehaviorSubject<OpenedFile | null>(null);
   activeFile$ = this.activeFileSubject.asObservable();
 
-  constructor(private http: HttpClient) {}
+  private rootPathSubject = new BehaviorSubject<string | null>(null);
+  rootPath$ = this.rootPathSubject.asObservable();
 
-  private backendUrls() { return ['http://localhost:8080', 'http://localhost:3000']; }
+  constructor(private zone: NgZone) {}
 
-  private async tryGet(path: string) {
-    for (const base of this.backendUrls()) {
-      const url = `${base}/api/file?path=${encodeURIComponent(path)}`;
-      try {
-        const res: any = await firstValueFrom(this.http.get(url));
-        return res;
-      } catch (err) {
-        // try next
-      }
+  async openFolder() {
+    if (!window.electronAPI) {
+      console.error('Electron API not available');
+      return;
     }
-    throw new Error('All backends failed');
+    const path = await window.electronAPI.selectFolder();
+    if (path) {
+      this.zone.run(() => {
+        this.rootPathSubject.next(path);
+        this.openedFilesSubject.next([]);
+        this.activeFileSubject.next(null);
+      });
+    }
   }
 
-  private async tryPost(path: string, content: string) {
-    for (const base of this.backendUrls()) {
-      const url = `${base}/api/file`;
-      try {
-        const res: any = await firstValueFrom(this.http.post(url, { path, content }));
-        return res;
-      } catch (err) {
-        // try next
-      }
-    }
-    throw new Error('All backends failed');
-  }
-
-  private async tryPostJson(endpoint: string, body: any) {
-    const errors: any[] = [];
-    // Try each configured backend, then try a relative path as a last resort
-    const bases = [...this.backendUrls(), ''];
-    for (const base of bases) {
-      // construct candidate URL: if base is empty use endpoint (relative)
-      const url = base ? `${base}${endpoint}` : endpoint;
-      try {
-        console.debug('[FileExplorerService] POST', url, body);
-        const res: any = await firstValueFrom(this.http.post(url, body));
-        return res;
-      } catch (err) {
-        console.warn('[FileExplorerService] POST failed', url, err);
-        errors.push({ url, err });
-        // try next
-      }
-    }
-    const msg = errors.map(e => `${e.url}: ${e.err?.message || e.err}`).join(' | ');
-    throw new Error('All backends failed — attempts: ' + msg);
+  async getTree(path: string) {
+    if (!window.electronAPI) return [];
+    const items = await window.electronAPI.readDirectory(path);
+    // Sort folders first, then files
+    return items.sort((a, b) => {
+      if (a.type === b.type) return a.name.localeCompare(b.name);
+      return a.type === 'folder' ? -1 : 1;
+    });
   }
 
   async openFile(path: string, name?: string) {
-    const payload = await this.tryGet(path);
-    const file: OpenedFile = { id: path, path: payload.path || path, name: name || (payload.path != null ? payload.path.split('\\').pop() : path), content: payload.content || '' };
+    if (!window.electronAPI) return;
+    const content = await window.electronAPI.readFile(path);
+    const file: OpenedFile = { 
+      id: path, 
+      path: path, 
+      name: name || path.split(/[\\/]/).pop() || path, 
+      content: content 
+    };
+    
     const existing = this.openedFilesSubject.value.find(f => f.id === file.id);
     if (!existing) {
       this.openedFilesSubject.next([...this.openedFilesSubject.value, file]);
@@ -94,7 +94,8 @@ export class FileExplorerService {
   }
 
   async saveFile(path: string, content: string) {
-    await this.tryPost(path, content);
+    if (!window.electronAPI) return;
+    await window.electronAPI.writeFile(path, content);
     // update local cache
     const arr = this.openedFilesSubject.value.map(f => f.id === path ? { ...f, content } : f);
     this.openedFilesSubject.next(arr);
@@ -102,9 +103,9 @@ export class FileExplorerService {
     if (active && active.id === path) this.activeFileSubject.next({ ...active, content });
   }
 
-  // delete a file or folder. If folder, remove recursively.
   async deletePath(path: string) {
-    await this.tryPostJson('/api/delete', { path });
+    if (!window.electronAPI) return;
+    await window.electronAPI.deletePath(path);
     // remove opened files whose path equals path or starts with path + separator
     const arr = this.openedFilesSubject.value.filter(f => {
       if (f.path === path) return false;
@@ -120,13 +121,14 @@ export class FileExplorerService {
     }
   }
 
-  // rename a path (file or folder). newName is only the last segment (name.ext) or folder name
   async renamePath(oldPath: string, newName: string) {
+    if (!window.electronAPI) return;
     // compute new path by replacing last segment
     const sepIndex = Math.max(oldPath.lastIndexOf('\\'), oldPath.lastIndexOf('/'));
     const parent = sepIndex >= 0 ? oldPath.substring(0, sepIndex + 1) : '';
     const newPath = parent + newName;
-    await this.tryPostJson('/api/rename', { oldPath, newPath });
+    
+    await window.electronAPI.renamePath(oldPath, newPath);
 
     // update opened files: rename exact or prefix
     const arr = this.openedFilesSubject.value.map(f => {
@@ -159,9 +161,13 @@ export class FileExplorerService {
     }
   }
 
-  // create file or folder inside parent. If name includes a dot treat as file, otherwise folder.
   async createInParent(parent: string, name: string) {
-    const res = await this.tryPostJson('/api/create', { parent, name });
-    return res;
+    if (!window.electronAPI) return;
+    // Simple heuristic: if it has a dot, it's a file.
+    if (name.includes('.')) {
+      return await window.electronAPI.createFile(parent, name);
+    } else {
+      return await window.electronAPI.createFolder(parent, name);
+    }
   }
 }

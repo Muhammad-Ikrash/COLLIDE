@@ -1,0 +1,17 @@
+<div class="file-explorer-container">
+    <div *ngIf="!rootPath" class="empty-state">
+        <p>No folder opened</p>
+        <button (click)="openFolder()">Open Folder</button>
+    </div>
+    <div *ngIf="rootPath" class="tree-content">
+        <div class="tree-root" *ngIf="tree() as t; else loading">
+            <file-node [node]="t" [level]="0"
+                (open)="open($event.path,$event.name)"
+                (rename)="onRename($event)"
+                (delete)="onDelete($event)"
+                (create)="onCreate($event)"
+            ></file-node>
+        </div>
+        <ng-template #loading><div>Loading file tree…</div></ng-template>
+    </div>
+</div>

@@ -1,1 +1,17 @@
-<p>file-tabs works!</p>
+<div class="tabs-container">
+	<ng-container *ngIf="openedFiles.length; else empty">
+		<div
+			class="tab"
+			*ngFor="let f of openedFiles"
+			[class.active]="activeFile && activeFile.id === f.id"
+			(click)="activate(f.id)"
+		>
+			<span class="mini-close" (click)="close($event, f.id)">×</span>
+			<span class="tab-name">{{ f.name }}</span>
+		</div>
+	</ng-container>
+
+	<ng-template #empty>
+		<div class="no-tabs">No open files</div>
+	</ng-template>
+</div>

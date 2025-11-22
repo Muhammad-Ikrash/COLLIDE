@@ -1,0 +1,51 @@
+:host {
+	display: block;
+	height: 100%;
+}
+
+.tabs-container {
+	display: flex;
+	align-items: center;
+	height: 100%;
+	gap: 8px;
+	padding: 4px 8px;
+}
+
+.tab {
+	display: flex;
+	align-items: center;
+	background: var(--bg-tab, rgba(255,255,255,0.03));
+	color: var(--fg-tab, #ddd);
+	padding: 6px 10px 6px 6px;
+	border-radius: 4px;
+	cursor: pointer;
+	user-select: none;
+}
+
+.tab.active {
+	background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+	box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.mini-close {
+	display: inline-block;
+	width: 16px;
+	height: 16px;
+	line-height: 16px;
+	text-align: center;
+	margin-right: 8px;
+	font-weight: 700;
+	color: var(--fg-mini-close, #ff6b6b);
+}
+
+.tab-name {
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	max-width: 240px;
+}
+
+.no-tabs {
+	color: var(--fg-muted, #888);
+	padding-left: 8px;
+}

@@ -15,14 +15,112 @@
   .loading-content {
     text-align: center;
     
-    h1 {
-      color: var(--color-primary);
-      margin-bottom: 1rem;
+    .logo {
+      position: relative;
+      width: 34rem;
+      height: 8rem;
+      margin: 0 auto 1rem auto;
+      /* tweak this value to visually center the logo pair; both words are shifted equally */
+      --logo-nudge: 0.4ch;
+      overflow: visible;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    
-    p {
+
+    .word {
+      position: absolute;
+      /* responsive font-size: scales with viewport but clamped to reasonable bounds */
+      font-size: clamp(3.2rem, 10.5vw, 8.5rem);
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: 0.02em;
+      will-change: transform;
+      user-select: none;
+      -webkit-font-smoothing: antialiased;
+      white-space: nowrap;
+    }
+
+    /* inner static nudge applied to the text content so both words shift equally
+       (keeps them touching while correcting visual center imbalance) */
+    .word .inner {
+      display: inline-block;
+      transform: translateX(var(--logo-nudge, 0ch));
+      will-change: transform;
+    }
+
+    /* Anchor each word to the center edge so their edges meet exactly at collision */
+    .coll {
+      color: var(--purple-color, var(--color-primary));
+      text-shadow: 0 0 15px var(--purple-color);
+
+      /* anchor the right edge of COLL to the center */
+      right: 40%;
+      left: auto;
+      /* start off-screen to the left */
+      transform: translateX(-120%);
+      /* faster approach and smoother collision + decelerating bounce */
+      animation: collide-coll 1.6s linear infinite;
+    }
+
+    .ide {
+      color: var(--orange-color, var(--color-accent));
+      text-shadow: 0 0 15px var(--orange-color);
+      /* anchor the left edge of IDE to the center */
+      left: 60%;
+      right: auto;
+      /* start off-screen to the right */
+      transform: translateX(120%);
+      animation: collide-ide 1.6s linear infinite;
+    }
+
+    /* Keyframes tuned so both words reach translateX(0) at 50% — their anchored edges touch with no gap */
+    /*
+      Keyframe strategy:
+      - 0% -> 50% : approach phase. Use small movements early and larger movements near 50% to simulate accelerating motion.
+      - 50% : collision point (translateX(0)). Edges meet exactly because elements are anchored at center.
+      - 50% -> 100% : bounce-back phase. Start with a quicker outward movement then gradually reduce step sizes so motion decelerates as it approaches the edge.
+    */
+    @keyframes collide-coll {
+      0%   { transform: translateX(-120%); }
+      15%  { transform: translateX(-100%); }
+      35%  { transform: translateX(-55%); }
+      45%  { transform: translateX(-12%); }
+      50%  { transform: translateX(0%); }
+      /* recoil then decelerating outward motion */
+      58%  { transform: translateX(-18%); }
+      72%  { transform: translateX(-48%); }
+      88%  { transform: translateX(-86%); }
+      100% { transform: translateX(-120%); }
+    }
+
+    @keyframes collide-ide {
+      0%   { transform: translateX(120%); }
+      15%  { transform: translateX(100%); }
+      35%  { transform: translateX(55%); }
+      45%  { transform: translateX(12%); }
+      50%  { transform: translateX(0%); }
+      /* recoil then decelerating outward motion */
+      58%  { transform: translateX(18%); }
+      72%  { transform: translateX(48%); }
+      88%  { transform: translateX(86%); }
+      100% { transform: translateX(120%); }
+    }
+
+    .loading-sub {
       color: var(--text-secondary);
       margin-bottom: 2rem;
+      font-size: 1rem;
+    }
+
+    .theme-toggle {
+      margin-top: 2rem;
+      padding: 0.5rem 1rem;
+      background: var(--color-primary);
+      color: var(--color-primary-button-text);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
     }
 
     button {

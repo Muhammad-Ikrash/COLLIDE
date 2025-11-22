@@ -9,9 +9,14 @@ import { LoadingScreen } from './loading-screen/loading-screen/loading-screen';
 export const routes: Routes = [
   // 1. Initial Load: Loading Screen Component handles the check and redirect.
   { 
-    path: '', 
+    path: 'screen',  // was empty
     component: LoadingScreen,
     // No guard here, as this component's ngOnInit does the initial check.
+  },
+  // Static route so the loading screen can be opened directly during dev/testing
+  {
+    path: 'loading',
+    component: LoadingScreen,
   },
   
   // 2. Auth Feature (Lazy Loaded)
@@ -29,7 +34,7 @@ export const routes: Routes = [
 
   // 4. Protected Workspace Feature (Lazy Loaded)
   {
-    path: 'workspace',
+    path: '', // was workspace 
     canActivate: [authGuard], // PROTECTED!
     loadChildren: () => import('./workspace/workspace.routes').then(r => r.WORKSPACE_ROUTES),
   },

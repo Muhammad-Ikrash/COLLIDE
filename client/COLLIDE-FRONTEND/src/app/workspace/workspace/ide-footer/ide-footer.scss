@@ -1,0 +1,29 @@
+:host {
+	display: block;
+	height: 100%;
+}
+
+.ide-footer-content {
+	display: flex;
+	align-items: center;
+	height: 100%;
+	padding: 0 12px;
+}
+
+.ide-footer-content .left {
+	flex: 0 0 auto;
+	color: var(--fg-muted, #ccc);
+	font-size: 0.95rem;
+}
+
+.ide-footer-content .center {
+	flex: 1 1 auto;
+	text-align: center;
+	color: var(--fg-muted, #aaa);
+}
+
+.ide-footer-content .right {
+	flex: 0 0 auto;
+	color: var(--fg-muted, #ccc);
+}
+

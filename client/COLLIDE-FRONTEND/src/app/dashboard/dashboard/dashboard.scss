@@ -1,0 +1,215 @@
+.dashboard {
+  min-height: 60vh;
+  background-color: var(--bg-main);
+  padding: 1rem;
+}
+
+.dashboard-header {
+  margin-bottom: 1rem;
+  
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .dashboard-title {
+    color: var(--text-white);
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--text-white);  }
+
+  .user-avatar {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: var(--bg-form-input);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1rem;
+    backdrop-filter: blur(10px);
+  }
+
+  .username {
+    font-size: 1rem;
+    font-weight: 500;
+  }
+}
+
+.dashboard-main {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.workspaces-section {
+  .section-header {
+    margin-bottom: 2rem;
+    
+    .section-title {
+      color: white;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .section-subtitle {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 1rem;
+      margin: 0;
+    }
+  }
+}
+
+.workspaces-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.workspace-card {
+  background-color: var( --bg-form-card);
+  border-radius: 16px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    background: var(--bg-form-card);
+  }
+
+  .workspace-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .workspace-icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  .workspace-info {
+    flex: 1;
+  }
+
+  .workspace-name {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text-light-gray);
+    margin: 0 0 0.5rem 0;
+  }
+
+  .workspace-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: #6b7280;
+  }
+
+  .workspace-role {
+    font-weight: 500;
+  }
+
+  .workspace-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .last-accessed {
+    font-size: 0.9rem;
+    color: #6b7280;
+  }
+
+  .access-indicator {
+    font-size: 0.8rem;
+    
+    &.indicator-2h { color: #10b981; }
+    &.indicator-1d { color: #f59e0b; }
+    &.indicator-3d { color: #ef4444; }
+    &.indicator-1w { color: #8b5cf6; }
+  }
+}
+
+.add-new-card {
+  background: var(--bg-form-card);
+  border: 2px dashed rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+
+  &:hover {
+    background: var(--bg-form-input);
+    border-color: var(--border-default);
+  }
+
+  .add-new-content {
+    text-align: center;
+    color: #6b7280;
+
+    .add-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      color: #9ca3af;
+    }
+
+    h3 {
+      margin: 0 0 0.5rem 0;
+      color: #374151;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.9rem;
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .dashboard {
+    padding: 1rem;
+  }
+
+  .dashboard-header .header-content {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .workspaces-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .workspace-card {
+    padding: 1.25rem;
+  }
+}

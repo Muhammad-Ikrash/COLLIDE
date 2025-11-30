@@ -1,1 +1,69 @@
-<p>dashboard works!</p>
+<div class="dashboard">
+  <!-- Header Section -->
+  <header class="dashboard-header">
+    <div class="header-content">
+      <h1 class="dashboard-title">Dashboard</h1>
+      <div class="user-info">
+        <div class="user-avatar">
+          {{ getInitials(username) }}
+        </div>
+        <span class="username">{{ username }}</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="dashboard-main">
+    <section class="workspaces-section">
+      <div class="section-header">
+        <h2 class="section-title">Current Workspaces</h2>
+        <p class="section-subtitle">Manage and access your development projects</p>
+      </div>
+
+      <!-- Workspaces Grid -->
+      <div class="workspaces-grid">
+        <div *ngFor="let workspace of workspaces" 
+             class="workspace-card"
+             (click)="openWorkspace(workspace)">
+          
+          <!-- Workspace Header -->
+          <div class="workspace-header">
+            <div class="workspace-icon" [style.background]="workspace.color">
+              {{ getInitials(workspace.name) }}
+            </div>
+            <div class="workspace-info">
+              <h3 class="workspace-name">{{ workspace.name }}</h3>
+              <div class="workspace-meta">
+                <span class="workspace-role">
+                  {{ getRoleIcon(workspace.role) }} {{ workspace.role }}
+                </span>
+                <span class="workspace-members">
+                  • {{ workspace.memberCount }} members
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Workspace Footer -->
+          <div class="workspace-footer">
+            <span class="last-accessed">
+              Last accessed {{ workspace.lastAccessed }}
+            </span>
+            <div class="access-indicator" [class]="'indicator-' + workspace.lastAccessedTime">
+              ●
+            </div>
+          </div>
+        </div>
+
+        <!-- Add New Workspace Card -->
+        <div class="workspace-card add-new-card">
+          <div class="add-new-content">
+            <div class="add-icon">+</div>
+            <h3>Create New Workspace</h3>
+            <p>Start a new development project</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>

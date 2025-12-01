@@ -11,11 +11,19 @@ import org.springframework.web.bind.annotation.RestController;
 import io.github.cdimascio.dotenv.Dotenv;
 
 
-@SpringBootApplication(exclude = {
-	org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration.class,
-	org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration.class
+@SpringBootApplication
+@org.springframework.context.annotation.ComponentScan(basePackages = {
+	"server_springboot",
+	"Controllers",
+	"Services",
+	"Repositories",
+	"Utils",
+	"Filters",
+	"Config",
+	"DTOs"
 })
-@org.springframework.context.annotation.Import(Controllers.FileTreeController.class)
+@org.springframework.data.jpa.repository.config.EnableJpaRepositories(basePackages = "Repositories")
+@org.springframework.boot.autoconfigure.domain.EntityScan(basePackages = "Entities")
 @RestController
 public class ServerSpringbootApplication {
 

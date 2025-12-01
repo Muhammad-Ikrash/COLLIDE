@@ -6,7 +6,7 @@
 
     "concurrently": "^9.2.1",
 
-    "electron": "^38.2.0",
+    "electron": "^38.7.2",
 
     "wait-on": "^9.0.1"
 
@@ -35,12 +35,12 @@
     "test": "echo \"Error: no test specified\" && exit 1",
 
     "electron-start": "electron ./Electron/main.js",
-    
-    "angular-start": "cd COLLIDE-FRONTEND && \"C:\\Program Files\\nodejs\\node.exe\" ./node_modules/@angular/cli/bin/ng.js serve", 
 
-    "dev:electron": "wait-on http://localhost:4200 && electron ./Electron/main.js",
+    "angular-start": "cd COLLIDE-FRONTEND && \"C:\\Program Files\\nodejs\\node.exe\" ./node_modules/@angular/cli/bin/ng.js serve",
 
-    "dev:start": "concurrently \"npm run angular-start\" \"npm run dev:electron\""
+    "dev:electron": "npx wait-on http://localhost:4200 && npx electron ./Electron/main.js",
+
+    "dev:start": "node_modules\\.bin\\concurrently.cmd \"npm run angular-start\" \"npm run dev:electron\""
 
   },
 

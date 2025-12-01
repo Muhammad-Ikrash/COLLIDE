@@ -67,5 +67,18 @@ public class ProjectMembershipService {
                 .orElseThrow(() -> new IllegalArgumentException("Membership not found"));
         return membership.getRole();
     }
+    
+    @Transactional
+    public void removeMembership(Long actorUserId, Long targetUserId, Long projectId) {
+        Optional<ProjectMembership> actorMembership = membershipRepository.findByUserIdAndProjectId(actorUserId, projectId);
+        if (actorMembership.isEmpty() || (actorMembership.get().getRole() != Role.ADMIN
+                && actorMembership.get().getRole() != Role.CO_ADMIN)) {
+            throw new SecurityException("Not authorized to remove membership");
+        }
+        
+        ProjectMembership membership = membershipRepository.findByUserIdAndProjectId(targetUserId, projectId)
+                .orElseThrow(() -> new IllegalArgumentException("Membership not found"));
+        membershipRepository.delete(membership);
+    }
 
 }

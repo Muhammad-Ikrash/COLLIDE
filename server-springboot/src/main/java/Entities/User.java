@@ -22,6 +22,12 @@ public class User {
 
     @Column(nullable = false)
     private Instant createdAt = Instant.now();
+    
+    @Column(nullable = true)
+    private String resetToken;
+    
+    @Column(nullable = true)
+    private Instant resetTokenExpiry;
 
 
     // Constructors
@@ -46,6 +52,15 @@ public class User {
 
     public String getPassHash() { return passHash; }
     public void setPassHash(String password) { this.passHash = password; }
+
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+    
+    public String getResetToken() { return resetToken; }
+    public void setResetToken(String resetToken) { this.resetToken = resetToken; }
+    
+    public Instant getResetTokenExpiry() { return resetTokenExpiry; }
+    public void setResetTokenExpiry(Instant resetTokenExpiry) { this.resetTokenExpiry = resetTokenExpiry; }
 
     @Override
     public String toString() {

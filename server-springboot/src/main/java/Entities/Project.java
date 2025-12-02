@@ -26,6 +26,9 @@ public class Project {
     @Column(nullable = true)
     private Instant lastModifiedAt;
 
+    @Column(nullable = true)
+    private String folderPath;
+
     @OneToMany(mappedBy = "project",
         cascade = CascadeType.ALL,
         orphanRemoval = true,
@@ -40,6 +43,12 @@ public class Project {
     public Project(String name, long ownerId) {
         this.name = name;
         this.ownerId = ownerId;
+    }
+
+    public Project(String name, long ownerId, String folderPath) {
+        this.name = name;
+        this.ownerId = ownerId;
+        this.folderPath = folderPath;
     }
 
     // Getters and setters
@@ -57,6 +66,9 @@ public class Project {
 
     public Instant getLastModifiedAt() { return lastModifiedAt; }
     public void setLastModifiedAt(Instant lastModifiedAt) { this.lastModifiedAt = lastModifiedAt; }
+
+    public String getFolderPath() { return folderPath; }
+    public void setFolderPath(String folderPath) { this.folderPath = folderPath; }
 
     // Files relationship helpers
     public List<ProjectFile> getFiles() { return files; }

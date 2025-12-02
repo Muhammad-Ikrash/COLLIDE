@@ -17,15 +17,29 @@ export class AuthService {
     private readonly _isLoggedIn = new BehaviorSubject<boolean>(!!localStorage.getItem(AUTH_TOKEN_KEY));
     public readonly isLoggedIn$ = this._isLoggedIn.asObservable(); // Public observable for component subscriptions
 
+    private readonly _currentUser = new BehaviorSubject<any>(null);
+    public readonly currentUser$ = this._currentUser.asObservable();
+
     constructor() {
         // Listen to Supabase auth state changes
         supabase.auth.onAuthStateChange((event, session) => {
             if (session?.access_token) {
                 this.setToken(session.access_token);
+                this._currentUser.next(session.user);
             } else {
                 this.clearToken();
+                this._currentUser.next(null);
             }
         });
+
+        // Initialize user if token exists
+        if (this.getToken()) {
+            this.getCurrentSession().then(session => {
+                if (session?.user) {
+                    this._currentUser.next(session.user);
+                }
+            });
+        }
     }
 
     /**

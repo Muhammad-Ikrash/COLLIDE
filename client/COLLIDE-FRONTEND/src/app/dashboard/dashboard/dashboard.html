@@ -1,1 +1,149 @@
-<p>dashboard works!</p>
+<div class="dashboard">
+    <!-- Header Section -->
+    <header class="dashboard-header">
+        <div class="header-content">
+            <h1 class="dashboard-title">Dashboard</h1>
+            <div class="user-info">
+                <div class="user-avatar">
+                    {{ getInitials(username) }}
+                </div>
+                <span class="username">{{ username }}</span>
+
+                <!-- Dropdown Menu -->
+                <div class="user-dropdown">
+                    <div class="dropdown-item" [routerLink]="['/dashboard/account']">
+                        <span class="icon">👤</span>
+                        Account Info
+                    </div>
+                    <div class="dropdown-item logout" (click)="logout()">
+                        <span class="icon">🚪</span>
+                        Logout
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <section class="workspaces-section">
+            <div class="section-header">
+                <h2 class="section-title">Current Workspaces</h2>
+                <p class="section-subtitle">Manage and access your development projects</p>
+            </div>
+
+            <!-- Workspaces Grid -->
+            <div class="workspaces-grid">
+                <div *ngFor="let workspace of workspaces" class="workspace-card" (click)="openWorkspace(workspace)">
+
+                    <!-- Workspace Header -->
+                    <div class="workspace-header">
+                        <div class="workspace-icon" [style.background]="workspace.color">
+                            {{ getInitials(workspace.name) }}
+                        </div>
+                        <div class="workspace-info">
+                            <h3 class="workspace-name">{{ workspace.name }}</h3>
+                            <div class="workspace-meta">
+                                <span class="workspace-role">
+                                    {{ getRoleIcon(workspace.role) }} {{ workspace.role }}
+                                </span>
+                                <span class="workspace-members">
+                                    • {{ workspace.memberCount }} members
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Workspace Footer -->
+                    <div class="workspace-footer">
+                        <span class="last-accessed">
+                            Last accessed {{ workspace.lastAccessed }}
+                        </span>
+                        <div class="access-indicator" [class]="'indicator-' + workspace.lastAccessedTime">
+                            ●
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add New Workspace Card -->
+                <div class="workspace-card add-new-card" (click)="openCreateModal()">
+                    <div class="add-new-content">
+                        <div class="add-icon">+</div>
+                        <h3>Create New Workspace</h3>
+                        <p>Start a new development project</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Create Workspace Modal -->
+    <div class="modal-overlay" *ngIf="showCreateModal" (click)="closeCreateModal()">
+        <div class="modal-container" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h2>Create New Workspace</h2>
+                <button class="modal-close" (click)="closeCreateModal()">×</button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- Error Message -->
+                <div class="error-message" *ngIf="createError">
+                    {{ createError }}
+                </div>
+
+                <!-- Project Name Input -->
+                <div class="form-group">
+                    <label for="projectName">Project Name</label>
+                    <input 
+                        type="text" 
+                        id="projectName" 
+                        [(ngModel)]="newProjectName"
+                        placeholder="Enter project name"
+                        [disabled]="isCreating"
+                    />
+                </div>
+
+                <!-- Folder Selection -->
+                <div class="form-group">
+                    <label>Project Folder</label>
+                    <div class="folder-select">
+                        <input 
+                            type="text" 
+                            [value]="newProjectFolder"
+                            placeholder="Select a folder..."
+                            readonly
+                        />
+                        <button 
+                            type="button" 
+                            class="btn-browse"
+                            (click)="selectFolder()"
+                            [disabled]="isCreating"
+                        >
+                            Browse
+                        </button>
+                    </div>
+                    <p class="folder-hint" *ngIf="newProjectFolder">
+                        📁 {{ newProjectFolder }}
+                    </p>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button 
+                    class="btn-cancel" 
+                    (click)="closeCreateModal()"
+                    [disabled]="isCreating"
+                >
+                    Cancel
+                </button>
+                <button 
+                    class="btn-create" 
+                    (click)="createProject()"
+                    [disabled]="isCreating || !newProjectName.trim() || !newProjectFolder.trim()"
+                >
+                    {{ isCreating ? 'Creating...' : 'Create Project' }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

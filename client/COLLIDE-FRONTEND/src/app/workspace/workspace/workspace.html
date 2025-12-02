@@ -1,3 +1,4 @@
+@if (!isLoading && !error) {
 <div class="workspace-container">
     <div class="workspace-header"> 
         <app-workspace-header></app-workspace-header>
@@ -17,8 +18,32 @@
     <div class="ide-footer"> 
         <app-ide-footer></app-ide-footer>
     </div>
-    <div class="terminal"> 
-        <p>hahah</p>
-        <app-terminal></app-terminal>
+    <div class="terminal">
+        @if (projectRootPath) {
+            <app-terminal [terminalPath]="projectRootPath"></app-terminal>
+        }
     </div>
 </div>
+}
+
+<!-- Loading State -->
+@if (isLoading) {
+<div class="workspace-loading">
+    <div class="loading-content">
+        <div class="spinner"></div>
+        <p>Loading workspace...</p>
+    </div>
+</div>
+}
+
+<!-- Error State -->
+@if (error) {
+<div class="workspace-error">
+    <div class="error-content">
+        <span class="error-icon">⚠️</span>
+        <h2>Failed to Load Workspace</h2>
+        <p>{{ error }}</p>
+        <button (click)="goToDashboard()">Back to Dashboard</button>
+    </div>
+</div>
+}

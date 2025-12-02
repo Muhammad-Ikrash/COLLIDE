@@ -31,10 +31,26 @@ public class ServerSpringbootApplication {
 
 		// Load .env if present, but don't fail startup if it's missing (useful for local dev)
 		try {
-			Dotenv dotenv = Dotenv.load();
-			String dbPooler = dotenv.get("DB_POOLER");
-			if (dbPooler != null) {
-				System.setProperty("DB_POOLER", dbPooler);
+			// Try loading from parent directory (project root) first, then current directory
+			Dotenv dotenv = Dotenv.configure()
+				.directory("../")  // Look in parent directory (e.g., when running from server-springboot/)
+				.ignoreIfMissing()
+				.load();
+			
+			// If no .env found in parent, try current directory
+			if (dotenv.get("DB_POOLER") == null) {
+				dotenv = Dotenv.configure()
+					.ignoreIfMissing()
+					.load();
+			}
+			
+			// Set all database-related environment variables as system properties
+			String[] envVars = {"DB_POOLER", "DB_DRIVER", "HIBERNATE_DIALECT", "DB_USERNAME", "DB_PASSWORD"};
+			for (String var : envVars) {
+				String value = dotenv.get(var);
+				if (value != null) {
+					System.setProperty(var, value);
+				}
 			}
 		} catch (Exception ex) {
 			// .env not present or failed to load - continue without it

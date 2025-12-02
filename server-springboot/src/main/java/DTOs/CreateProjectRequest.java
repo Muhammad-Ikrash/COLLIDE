@@ -8,11 +8,18 @@ public class CreateProjectRequest {
     @NotBlank(message = "Project name is required")
     @Size(min = 1, max = 100, message = "Project name must be between 1 and 100 characters")
     private String name;
+
+    private String folderPath;
     
     public CreateProjectRequest() {}
     
     public CreateProjectRequest(String name) {
         this.name = name;
+    }
+
+    public CreateProjectRequest(String name, String folderPath) {
+        this.name = name;
+        this.folderPath = folderPath;
     }
     
     public String getName() {
@@ -21,6 +28,14 @@ public class CreateProjectRequest {
     
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getFolderPath() {
+        return folderPath;
+    }
+
+    public void setFolderPath(String folderPath) {
+        this.folderPath = folderPath;
     }
 }
 

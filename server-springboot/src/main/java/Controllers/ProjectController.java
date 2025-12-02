@@ -50,12 +50,13 @@ public class ProjectController {
             User user = userService.getOrCreateUserByEmail(email, null);
             Long userId = user.getId();
             
-            Project project = projectService.createProject(request.getName(), userId);
+            Project project = projectService.createProject(request.getName(), userId, request.getFolderPath());
             
             return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
                 "id", project.getId(),
                 "name", project.getName(),
                 "ownerId", project.getOwnerId(),
+                "folderPath", project.getFolderPath() != null ? project.getFolderPath() : "",
                 "createdAt", project.getCreatedAt(),
                 "lastModifiedAt", project.getLastModifiedAt()
             ));
@@ -87,6 +88,7 @@ public class ProjectController {
                     projectMap.put("id", p.getId());
                     projectMap.put("name", p.getName());
                     projectMap.put("ownerId", p.getOwnerId());
+                    projectMap.put("folderPath", p.getFolderPath() != null ? p.getFolderPath() : "");
                     projectMap.put("createdAt", p.getCreatedAt());
                     projectMap.put("lastModifiedAt", p.getLastModifiedAt() != null ? p.getLastModifiedAt() : p.getCreatedAt());
                     return projectMap;
@@ -132,6 +134,7 @@ public class ProjectController {
                 "id", project.getId(),
                 "name", project.getName(),
                 "ownerId", project.getOwnerId(),
+                "folderPath", project.getFolderPath() != null ? project.getFolderPath() : "",
                 "createdAt", project.getCreatedAt(),
                 "lastModifiedAt", project.getLastModifiedAt() != null ? project.getLastModifiedAt() : project.getCreatedAt()
             ));

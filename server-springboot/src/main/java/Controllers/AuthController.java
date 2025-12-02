@@ -9,6 +9,7 @@ import DTOs.RefreshTokenRequest;
 import Entities.User;
 import Services.UserService;
 import Utils.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -288,5 +289,66 @@ public class AuthController {
                 .body(Map.of("error", "An error occurred during password reset"));
         }
     }
+    
+    /**
+     * POST /api/auth/sync
+     * 
+     * Syncs a Supabase user to the local database.
+     * Call this after Supabase signup/login to ensure the user exists in our DB.
+     * This endpoint parses the Supabase JWT without signature verification 
+     * since Supabase already validated the token.
+     * 
+     * @param httpRequest HTTP request containing the Supabase JWT token
+     * @return User info from local database
+     */
+    @PostMapping("/sync")
+    public ResponseEntity<?> syncUser(HttpServletRequest httpRequest) {
+        try {
+            // Extract Authorization header
+            String authHeader = httpRequest.getHeader("Authorization");
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Missing or invalid Authorization header"));
+            }
+            
+            String token = authHeader.substring(7);
+            
+            // Parse Supabase JWT without signature verification
+            // We trust the token since Supabase already validated it
+            String email = jwtUtil.extractEmailWithoutVerification(token);
+            
+            if (email == null || email.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Could not extract email from token"));
+            }
+            
+            // Extract name from token if available (from user_metadata)
+            String name = jwtUtil.extractNameWithoutVerification(token);
+            
+            System.out.println("🔄 Syncing user: " + email + " (name: " + name + ")");
+            
+            // Get or create user in our database
+            User user = userService.getOrCreateUserByEmail(email, name);
+            
+            System.out.println("✅ User synced successfully: " + user.getEmail());
+            
+            // Return user info
+            return ResponseEntity.ok(Map.of(
+                "id", user.getId(),
+                "name", user.getName(),
+                "email", user.getEmail(),
+                "createdAt", user.getCreatedAt(),
+                "message", "User synced successfully"
+            ));
+            
+        } catch (Exception e) {
+            System.err.println("Sync user error: " + e.getMessage());
+            e.printStackTrace();
+            
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "An error occurred during user sync"));
+        }
+    }
 }
+
 

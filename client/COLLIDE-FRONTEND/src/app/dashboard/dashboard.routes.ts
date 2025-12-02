@@ -8,5 +8,9 @@ export const DASHBOARD_ROUTES: Routes = [
     path: '',
     component: Dashboard, // The main Dashboard view
     // Child routes for Dashboard go here if needed later (e.g., settings)
+  },
+  {
+    path: 'account',
+    loadComponent: () => import('./account-info/account-info').then(m => m.AccountInfo)
   }
 ];

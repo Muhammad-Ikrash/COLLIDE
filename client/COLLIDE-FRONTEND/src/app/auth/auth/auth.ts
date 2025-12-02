@@ -2,8 +2,11 @@ import { Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../core/services/auth.service';
 import { supabase } from '../../core/services/supabase.client';
+
+const API_BASE_URL = 'http://localhost:8080';
 
 @Component({
   selector: 'app-auth',
@@ -14,6 +17,7 @@ import { supabase } from '../../core/services/supabase.client';
 export class Auth {
   private router = inject(Router);
   private authService = inject(AuthService);
+  private http = inject(HttpClient);
 
   activeTab: 'login' | 'signup' = 'login';
   isLoading = false;
@@ -68,6 +72,10 @@ export class Auth {
       // If successful, Supabase auth state change will update the token via AuthService
       if (data.session?.access_token) {
         this.authService.setToken(data.session.access_token);
+        
+        // Sync user to backend database
+        await this.syncUserToBackend(data.session.access_token);
+        
         this.router.navigate(['/dashboard']);
       } else {
         this.errorMessage = 'No session returned. Please try again.';
@@ -124,6 +132,10 @@ export class Auth {
       if (data.session?.access_token) {
         // User is immediately signed in (email confirmation disabled)
         this.authService.setToken(data.session.access_token);
+        
+        // Sync user to backend database
+        await this.syncUserToBackend(data.session.access_token);
+        
         this.router.navigate(['/dashboard']);
       } else {
         // Email confirmation required
@@ -135,4 +147,20 @@ export class Auth {
       this.isLoading = false;
     }
   };
+  
+  /**
+   * Sync user to the Spring Boot backend database
+   * This ensures the user exists in our DB after Supabase authentication
+   */
+  private async syncUserToBackend(token: string): Promise<void> {
+    try {
+      await this.http.post(`${API_BASE_URL}/api/auth/sync`, {}, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      }).toPromise();
+      console.log('User synced to backend successfully');
+    } catch (error) {
+      // Log but don't block - user can still proceed, sync will happen on next API call
+      console.warn('Failed to sync user to backend:', error);
+    }
+  }
 }

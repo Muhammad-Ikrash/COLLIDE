@@ -43,5 +43,14 @@ public class CurrentUser {
         }
         return (String) email;
     }
+    
+    /**
+     * Get current user name from request (from Supabase user_metadata.full_name)
+     * May return null if name was not set during signup
+     */
+    public static String getName(HttpServletRequest request) {
+        Object name = request.getAttribute("name");
+        return name != null ? (String) name : null;
+    }
 }
 

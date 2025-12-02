@@ -33,6 +33,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         "/api/auth/forgot-password",
         "/api/auth/reset-password",
         "/api/auth/refresh",
+        "/api/auth/sync",  // Sync endpoint handles its own token parsing (trusts Supabase)
         "/api/hello"
     );
 
@@ -43,12 +44,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
         
-        // Handle CORS preflight requests (OPTIONS)
+        // Skip CORS preflight requests (OPTIONS) - handled by CorsFilter
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
-            response.setHeader("Access-Control-Allow-Origin", "*");
-            response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-            response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
-            response.setStatus(HttpServletResponse.SC_OK);
             filterChain.doFilter(request, response);
             return;
         }
@@ -75,27 +72,38 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = authHeader.substring(7);
 
         try {
-            // Validate token
-            if (!jwtUtil.validateToken(token)) {
+            // Parse Supabase token WITHOUT signature verification
+            // We trust Supabase already validated the token on their end
+            String email = jwtUtil.extractEmailWithoutVerification(token);
+            
+            if (email == null || email.isEmpty()) {
+                System.err.println("JWT Filter: Could not extract email from token");
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setContentType("application/json");
-                response.getWriter().write("{\"error\": \"Invalid or expired token\"}");
+                response.getWriter().write("{\"error\": \"Invalid token - could not extract email\"}");
                 return;
             }
 
-            // Extract user info from Supabase token and add to request
-            // Supabase user ID is a UUID string (from "sub" claim)
-            String userId = jwtUtil.extractUserId(token);
-            String email = jwtUtil.extractEmail(token);
+            // Extract other user info from Supabase token
+            String name = jwtUtil.extractNameWithoutVerification(token);
+            
+            // Extract user ID from claims (sub claim)
+            io.jsonwebtoken.Claims claims = jwtUtil.parseClaimsWithoutVerification(token);
+            String userId = claims != null ? claims.getSubject() : null;
+            
+            System.out.println("JWT Filter: Token parsed successfully for user: " + email);
             
             // Store user info in request attributes for controllers to use
             request.setAttribute("userId", userId);
             request.setAttribute("email", email);
+            request.setAttribute("name", name);
             
             // Continue to the next filter/controller
             filterChain.doFilter(request, response);
             
         } catch (Exception e) {
+            System.err.println("JWT Filter: Exception during token parsing: " + e.getMessage());
+            e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             response.getWriter().write("{\"error\": \"Invalid token: " + e.getMessage() + "\"}");

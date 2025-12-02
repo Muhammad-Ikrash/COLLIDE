@@ -10,7 +10,7 @@ export type OpenedFile = {
 
 declare global {
   interface Window {
-    electronAPI: {
+    electronAPI?: {
       selectFolder: () => Promise<string | null>;
       readDirectory: (path: string) => Promise<any[]>;
       readFile: (path: string) => Promise<string>;

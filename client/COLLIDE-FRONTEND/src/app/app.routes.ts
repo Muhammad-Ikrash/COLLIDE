@@ -3,6 +3,9 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { LoadingScreen } from './loading-screen/loading-screen/loading-screen';
+import { Auth } from './auth/auth/auth';
+import { ForgotPassword } from './auth/auth/forgot-password/forgot-password';
+import { ResetPassword } from './auth/auth/reset-password/reset-password';
 // NOTE: You need to create a simple 404/NotFound component
 // import { NotFoundComponent } from './not-found/not-found.component'; 
 
@@ -22,7 +25,16 @@ export const routes: Routes = [
   // 2. Auth Feature (Lazy Loaded)
   {
     path: 'auth',
-    loadChildren: () => import('./auth/auth.routes').then(r => r.AUTH_ROUTES),
+    component: Auth,
+    // loadChildren: () => import('./auth/auth.routes').then(r => r.AUTH_ROUTES),
+  },
+  {
+    path: 'auth/forgot-password',
+    component: ForgotPassword,
+  },
+  {
+    path: 'auth/reset-password',
+    component: ResetPassword,
   },
   
   // 3. Protected Dashboard Feature (Lazy Loaded)
@@ -34,12 +46,12 @@ export const routes: Routes = [
 
   // 4. Protected Workspace Feature (Lazy Loaded)
   {
-    path: '', // was workspace 
+    path: 'workspace', // was workspace // empty 
     canActivate: [authGuard], // PROTECTED!
     loadChildren: () => import('./workspace/workspace.routes').then(r => r.WORKSPACE_ROUTES),
   },
   
   // 5. Catch-all for 404 (You need a 404 Component)
   // { path: '**', component: NotFoundComponent, standalone: true }
-  { path: '**', redirectTo: 'dashboard' } // Temporary redirect until 404 component is built
+  { path: '**', redirectTo: 'auth' } // Temporary redirect until 404 component is built
 ];

@@ -6,7 +6,7 @@ import { Workspace } from './workspace/workspace';
 export const WORKSPACE_ROUTES: Routes = [
   {
     // Parameterized route: :projectId is required to load the workspace
-    path: '', // :projectId
+    path: ':projectId', // :projectId
     component: Workspace,
   },
   {

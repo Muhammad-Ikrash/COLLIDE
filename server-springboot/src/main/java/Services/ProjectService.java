@@ -34,10 +34,18 @@ public class ProjectService {
      */
     @Transactional
     public Project createProject(String name, Long ownerId) {
+        return createProject(name, ownerId, null);
+    }
+
+    /**
+     * Create a new project with folder path and add owner as ADMIN
+     */
+    @Transactional
+    public Project createProject(String name, Long ownerId, String folderPath) {
         User owner = userRepository.findById(ownerId)
             .orElseThrow(() -> new IllegalArgumentException("Owner not found"));
         
-        Project project = new Project(name, ownerId);
+        Project project = new Project(name, ownerId, folderPath);
         project.setLastModifiedAt(Instant.now());
         project = projectRepository.save(project);
         

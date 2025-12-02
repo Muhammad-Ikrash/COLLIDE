@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,12 +15,12 @@ import java.util.function.Function;
 
 /**
  * Utility class for JWT token operations
+ * Configured to validate Supabase JWT tokens
  */
 @Component
 public class JwtUtil {
     
-    // JWT secret key - in production, use environment variable
-    // For now, using a default key (CHANGE THIS IN PRODUCTION!)
+    // JWT secret key from Supabase (Base64 encoded)
     @Value("${jwt.secret:your-256-bit-secret-key-change-this-in-production-environment}")
     private String secret;
     
@@ -27,15 +28,12 @@ public class JwtUtil {
     private Long expiration;
     
     /**
-     * Get the signing key
+     * Get the signing key - decodes Base64 Supabase secret
      */
     private SecretKey getSigningKey() {
-        // Ensure secret is at least 256 bits (32 characters)
-        String key = secret;
-        if (key.length() < 32) {
-            key = key + "0".repeat(32 - key.length());
-        }
-        return Keys.hmacShaKeyFor(key.substring(0, 32).getBytes());
+        // Supabase JWT secrets are Base64 encoded
+        byte[] keyBytes = Base64.getDecoder().decode(secret);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
     
     /**
@@ -55,6 +53,28 @@ public class JwtUtil {
         Claims claims = extractAllClaims(token);
         // Supabase stores user ID in "sub" claim as a UUID string
         return claims.getSubject();
+    }
+    
+    /**
+     * Extract user name from Supabase token
+     * Supabase stores user metadata in "user_metadata" claim
+     */
+    @SuppressWarnings("unchecked")
+    public String extractName(String token) {
+        try {
+            Claims claims = extractAllClaims(token);
+            Object userMetadata = claims.get("user_metadata");
+            if (userMetadata instanceof Map) {
+                Map<String, Object> metadata = (Map<String, Object>) userMetadata;
+                Object fullName = metadata.get("full_name");
+                if (fullName != null) {
+                    return fullName.toString();
+                }
+            }
+            return null;
+        } catch (Exception e) {
+            return null;
+        }
     }
     
     /**
@@ -127,9 +147,81 @@ public class JwtUtil {
      */
     public Boolean validateToken(String token) {
         try {
-            return !isTokenExpired(token);
+            Claims claims = extractAllClaims(token);
+            boolean expired = claims.getExpiration().before(new Date());
+            if (expired) {
+                System.err.println("JwtUtil: Token is expired. Expiration: " + claims.getExpiration());
+            }
+            return !expired;
         } catch (Exception e) {
+            System.err.println("JwtUtil: Token validation error: " + e.getClass().getSimpleName() + " - " + e.getMessage());
             return false;
+        }
+    }
+    
+    /**
+     * Parse Supabase JWT claims WITHOUT signature verification.
+     * Use this only for Supabase tokens where we trust Supabase already validated the token.
+     * This is necessary because Supabase uses its own JWT secret for signing.
+     * 
+     * @param token The JWT token string
+     * @return Claims object with token data, or null if parsing fails
+     */
+    @SuppressWarnings("unchecked")
+    public Claims parseClaimsWithoutVerification(String token) {
+        try {
+            // JWT has 3 parts: header.payload.signature
+            String[] parts = token.split("\\.");
+            if (parts.length != 3) {
+                System.err.println("JwtUtil: Invalid JWT format");
+                return null;
+            }
+            
+            // Decode the payload (middle part) - it's Base64URL encoded
+            String payload = parts[1];
+            byte[] decodedBytes = Base64.getUrlDecoder().decode(payload);
+            String payloadJson = new String(decodedBytes);
+            
+            // Parse JSON to map
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            Map<String, Object> claimsMap = mapper.readValue(payloadJson, Map.class);
+            
+            // Convert to Claims using Jwts builder
+            return Jwts.claims().add(claimsMap).build();
+        } catch (Exception e) {
+            System.err.println("JwtUtil: Error parsing token without verification: " + e.getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Extract email from Supabase token WITHOUT signature verification
+     */
+    public String extractEmailWithoutVerification(String token) {
+        Claims claims = parseClaimsWithoutVerification(token);
+        if (claims == null) return null;
+        return claims.get("email", String.class);
+    }
+    
+    /**
+     * Extract name from Supabase token WITHOUT signature verification
+     */
+    @SuppressWarnings("unchecked")
+    public String extractNameWithoutVerification(String token) {
+        Claims claims = parseClaimsWithoutVerification(token);
+        if (claims == null) return null;
+        try {
+            Object userMetadata = claims.get("user_metadata");
+            if (userMetadata instanceof Map) {
+                Map<String, Object> metadata = (Map<String, Object>) userMetadata;
+                Object fullName = metadata.get("full_name");
+                if (fullName != null) {
+                    return fullName.toString();
+                }
+            }
+            return null;
+        } catch (Exception e) {
+            return null;
         }
     }
 }

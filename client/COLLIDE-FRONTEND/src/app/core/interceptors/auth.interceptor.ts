@@ -15,8 +15,16 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   // --- Bypass Logic ---
   // IMPORTANT: Do NOT intercept the authentication requests themselves (login/signup)
   // because you don't have a valid token *yet* when making those calls.
-  // We assume your future Spring Boot API base path for auth is '/api/auth'
-  if (req.url.includes('/api/auth')) { 
+  // Only bypass specific public auth endpoints, NOT all /api/auth/*
+  const publicEndpoints = [
+    '/api/auth/login',
+    '/api/auth/register',
+    '/api/auth/forgot-password',
+    '/api/auth/reset-password',
+    '/api/auth/refresh'
+  ];
+  
+  if (publicEndpoints.some(endpoint => req.url.includes(endpoint))) { 
     return next(req); 
   }
 

@@ -10,7 +10,7 @@ import { FitAddon } from 'xterm-addon-fit';
 export class TerminalComponent implements AfterViewInit, OnDestroy {
   @ViewChild('terminal') terminalRef!: ElementRef;
 
-  @Input() terminalPath! : string | null;  // to ensure that the temrinal is loaded in the folder 
+  @Input() terminalPath! : string | null;
   private term!: Terminal;
   private fitAddon!: FitAddon;
 

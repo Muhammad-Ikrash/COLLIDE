@@ -2,9 +2,68 @@ import { app, BrowserWindow, ipcMain, dialog } from "electron";
 import * as fs from "fs/promises";
 import * as path from "path";
 import { fileURLToPath } from 'url';
+import { spawn } from 'child_process';
+import os from 'os';
+
+let shell;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+let workingDir;
+
+ipcMain.on('terminal-start', (event, cwd) => {
+    if (shell) return;
+
+    // Use provided path or fallback to home directory
+    workingDir = cwd || os.homedir();
+    
+    shell = spawn(
+        process.platform === "win32" ? "cmd.exe" : "/bin/bash",
+        [],
+        {
+            cwd: workingDir,
+            shell: true
+        }
+    );
+
+    shell.stdout.on("data", (data) => {
+        let tempData = data.toString();
+        if (!tempData.includes(workingDir)) {
+            tempData = '\n' + tempData;
+        }
+        console.log('in electron stdout : ' + data.toString());
+        event.reply("terminal-data", tempData);
+    });
+
+    shell.stderr.on("data", (data) => {
+        console.log('in electron error : ' + data.toString());
+        event.reply("terminal-data", data.toString()); //terminal-error hona chahye tha yaha 
+    });
+
+    shell.on("close", () => {
+        shell = null;
+    });
+
+});
+
+ipcMain.on('terminal-input', (event, input) => {
+    if (!shell) return;
+    // console.log('in electron : ' + input);
+    if (input == '\r' || input == '\n') {
+        shell.stdin.write('\r\n');
+    } else {
+        shell.stdin.write(input);
+    }
+});
+
+ipcMain.on('terminal-kill', (event) => {
+    if (shell) {
+        shell.kill();
+        shell = null;
+    }
+});
+
 
 app.on("ready", () => {
     const mainWindow = new BrowserWindow({

@@ -1,24 +1,27 @@
 <div class="workspace-container">
-    <div class="workspace-header"> 
+    <div class="workspace-header">
         <app-workspace-header></app-workspace-header>
     </div>
     <div class="chat-sidebar">
         <app-chat-sidebar></app-chat-sidebar>
     </div>
-    <div class="file-explorer"> 
-        <app-file-explorer></app-file-explorer>
+    <div class="file-explorer">
+        <app-file-explorer (rootPathChange)="onRootPathChange($event)"></app-file-explorer>
     </div>
-    <div class="file-tabs"> 
+    <div class="file-tabs">
         <app-file-tabs></app-file-tabs>
     </div>
     <div class="ide-editor">
         <app-ide-editor></app-ide-editor>
     </div>
-    <div class="ide-footer"> 
+    <div class="ide-footer">
         <app-ide-footer></app-ide-footer>
     </div>
-    <div class="terminal"> 
-        <p>hahah</p>
-        <app-terminal></app-terminal>
+    <div class="terminal">
+        @if (projectRootPath) {
+            <app-terminal [terminalPath]="projectRootPath"></app-terminal>
+        }
+        <!-- <app-terminal *ngIf="projectRootPath" [terminalPath]="projectRootPath"></app-terminal> -->
+         <!-- <app-terminal></app-terminal> -->
     </div>
 </div>

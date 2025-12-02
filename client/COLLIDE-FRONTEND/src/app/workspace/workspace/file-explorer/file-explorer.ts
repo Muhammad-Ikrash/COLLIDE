@@ -3,6 +3,7 @@ import { FileExplorerService } from '../../../core/services/fileexplorer.service
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
+import { Emitter } from 'monaco-editor';
 
 type TreeNode = {
   id: string;
@@ -199,6 +200,13 @@ export class FileTreeComponent implements OnInit {
   expanded = signal(new Set<string>());
   rootPath: string | null = null;
 
+  // Output event to emit rootPath to parent component
+  @Output() rootPathChange = new EventEmitter<string | null>();
+
+
+
+
+
   constructor(@Inject(PLATFORM_ID) private platformId: Object, private fes: FileExplorerService) {
     if (isPlatformBrowser(this.platformId)) {
       (window as any).__fileTreeComponentInstance = this;
@@ -208,6 +216,8 @@ export class FileTreeComponent implements OnInit {
   ngOnInit() {
     this.fes.rootPath$.subscribe(path => {
       this.rootPath = path;
+      // Emit the rootPath to parent component
+      this.rootPathChange.emit(path);
       if (path) {
         this.loadRoot(path);
       }

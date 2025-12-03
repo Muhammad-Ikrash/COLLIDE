@@ -1,19 +1,110 @@
 .auth-container {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #000000;
+  background-color: var(--bg-main, #000000);
   padding: 20px;
+  overflow: hidden;
+}
+
+// Loading Screen Background with animated logo
+.loading-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 0;
+  opacity: 0.3; // Make it subtle so it doesn't distract from the form
+
+  .logo {
+    position: relative;
+    width: 34rem;
+    height: 8rem;
+    --logo-nudge: 0.4ch;
+    overflow: visible;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .word {
+    position: absolute;
+    font-size: clamp(4.5rem, 14vw, 12rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    will-change: transform;
+    user-select: none;
+    -webkit-font-smoothing: antialiased;
+    white-space: nowrap;
+  }
+
+  .word .inner {
+    display: inline-block;
+    transform: translateX(var(--logo-nudge, 0ch));
+    will-change: transform;
+  }
+
+  .coll {
+    color: var(--purple-color, #9333ea);
+    text-shadow: 0 0 15px var(--purple-color, #9333ea);
+    right: 40%;
+    left: auto;
+    transform: translateX(-120%);
+    animation: collide-coll 2.0s linear infinite;
+  }
+
+  .ide {
+    color: var(--orange-color, #ea580c);
+    text-shadow: 0 0 15px var(--orange-color, #ea580c);
+    left: 60%;
+    right: auto;
+    transform: translateX(120%);
+    animation: collide-ide 2.0s linear infinite;
+  }
+
+  @keyframes collide-coll {
+    0%   { transform: translateX(-120%); }
+    15%  { transform: translateX(-100%); }
+    35%  { transform: translateX(-55%); }
+    45%  { transform: translateX(-12%); }
+    50%  { transform: translateX(0%); }
+    58%  { transform: translateX(-18%); }
+    72%  { transform: translateX(-48%); }
+    88%  { transform: translateX(-86%); }
+    100% { transform: translateX(-120%); }
+  }
+
+  @keyframes collide-ide {
+    0%   { transform: translateX(120%); }
+    15%  { transform: translateX(100%); }
+    35%  { transform: translateX(55%); }
+    45%  { transform: translateX(12%); }
+    50%  { transform: translateX(0%); }
+    58%  { transform: translateX(18%); }
+    72%  { transform: translateX(48%); }
+    88%  { transform: translateX(86%); }
+    100% { transform: translateX(120%); }
+  }
 }
 
 .auth-card {
+  position: relative;
+  z-index: 1;
   width: 100%;
   max-width: 400px;
-  background-color: #1a1a1a;
+  background-color: rgba(26, 26, 26, 0.95);
+  backdrop-filter: blur(10px);
   border-radius: 12px;
   padding: 32px;
   border: 2px solid #3b82f6;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 
 .tab-bar {
@@ -39,7 +130,7 @@
 }
 
 .tab-button.active {
-  background-color: #2a2a2a;
+  background-color: #340e8b;
   color: #ffffff;
 }
 

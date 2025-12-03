@@ -11,6 +11,7 @@ export interface Project {
   folderPath: string;
   localFolderPath?: string;
   role?: string;
+  memberCount?: number;
   createdAt: string;
   lastModifiedAt: string;
 }

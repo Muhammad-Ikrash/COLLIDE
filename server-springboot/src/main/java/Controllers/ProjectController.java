@@ -86,6 +86,9 @@ public class ProjectController {
             List<Map<String, Object>> projectList = memberships.stream()
                 .map(m -> {
                     Project p = m.getProject();
+                    // Get member count for this project (excluding banned members)
+                    long memberCount = projectService.getProjectMemberCount(p.getId());
+                    
                     Map<String, Object> projectMap = new HashMap<>();
                     projectMap.put("id", p.getId());
                     projectMap.put("name", p.getName());
@@ -93,6 +96,7 @@ public class ProjectController {
                     projectMap.put("folderPath", p.getFolderPath() != null ? p.getFolderPath() : "");
                     projectMap.put("localFolderPath", m.getLocalFolderPath() != null ? m.getLocalFolderPath() : "");
                     projectMap.put("role", m.getRole().name());
+                    projectMap.put("memberCount", memberCount);
                     projectMap.put("createdAt", p.getCreatedAt());
                     projectMap.put("lastModifiedAt", p.getLastModifiedAt() != null ? p.getLastModifiedAt() : p.getCreatedAt());
                     return projectMap;

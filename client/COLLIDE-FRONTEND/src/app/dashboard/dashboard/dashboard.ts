@@ -9,7 +9,7 @@ interface Workspace {
   id: string;
   name: string;
   folderPath: string;
-  role: 'Admin' | 'Collaborator' | 'Viewer';
+  role: string;
   memberCount: number;
   lastAccessed: string;
   lastAccessedTime: string;
@@ -87,12 +87,21 @@ export class Dashboard implements OnInit {
       lastAccessedTime = `${weeks}w`;
     }
 
+    // Map backend role to display-friendly format
+    const roleMap: { [key: string]: string } = {
+      'ADMIN': 'Admin',
+      'CO_ADMIN': 'Co-Admin',
+      'CONTRIBUTOR': 'Contributor',
+      'VIEWER': 'Viewer'
+    };
+    const displayRole = roleMap[project.role || ''] || project.role || 'Member';
+
     return {
       id: project.id.toString(),
       name: project.name,
       folderPath: project.folderPath,
-      role: 'Admin', // TODO: Get actual role from membership
-      memberCount: 1, // TODO: Get actual member count
+      role: displayRole,
+      memberCount: project.memberCount || 1,
       lastAccessed,
       lastAccessedTime,
       color: this.colors[index % this.colors.length]
@@ -100,12 +109,14 @@ export class Dashboard implements OnInit {
   }
 
   getRoleIcon(role: string): string {
-    const icons = {
+    const icons: { [key: string]: string } = {
       'Admin': '👑',
-      'Collaborator': '👥',
-      'Viewer': '👀'
+      'Co-Admin': '⭐',
+      'Contributor': '👥',
+      'Viewer': '👀',
+      'Member': '📁'
     };
-    return icons[role as keyof typeof icons] || '📁';
+    return icons[role] || '📁';
   }
 
   getInitials(name: string): string {

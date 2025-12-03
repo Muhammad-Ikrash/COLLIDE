@@ -79,6 +79,16 @@ public class ProjectService {
     }
 
     /**
+     * Get member count for a project (excluding banned members)
+     */
+    public long getProjectMemberCount(Long projectId) {
+        List<ProjectMembership> memberships = membershipRepository.findByProjectId(projectId);
+        return memberships.stream()
+            .filter(m -> m.getRole() != Role.BANNED)
+            .count();
+    }
+
+    /**
      * Get user's membership for a specific project
      */
     public Optional<ProjectMembership> getUserMembership(Long userId, Long projectId) {

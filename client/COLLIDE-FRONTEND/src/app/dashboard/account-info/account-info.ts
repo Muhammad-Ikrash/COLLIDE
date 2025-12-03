@@ -18,6 +18,7 @@ export class AccountInfo implements OnInit {
 
   user: any = null;
   username = '';
+  newUsername = '';
   email = '';
   
   // Password change fields
@@ -25,9 +26,11 @@ export class AccountInfo implements OnInit {
   newPassword = '';
   confirmPassword = '';
   
+  // UI state
   isLoading = false;
   message = '';
   error = '';
+  showDeleteModal = false;
 
   ngOnInit() {
     this.authService.currentUser$.subscribe(u => {
@@ -39,32 +42,22 @@ export class AccountInfo implements OnInit {
     });
   }
 
-  async updateProfile() {
-    if (!this.username.trim()) return;
+  async updateUsername() {
+    if (!this.newUsername.trim()) return;
     
     this.isLoading = true;
-    this.message = '';
-    this.error = '';
+    this.clearMessages();
 
     try {
       const { error } = await supabase.auth.updateUser({
-        data: { full_name: this.username }
+        data: { full_name: this.newUsername.trim() }
       });
 
       if (error) throw error;
       
-      this.message = 'Profile updated successfully';
-      // Force refresh user session in auth service if needed, 
-      // though onAuthStateChange might handle it.
-      // But update metadata doesn't always trigger onAuthStateChange immediately in all client versions.
-      // We can manually update the local observable if we want instant feedback or reload session.
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-          // Manually updating the behavior subject in AuthService would require a public method or just rely on getSession
-          // For now, let's assume AuthService might pick it up or we reload.
-          // Actually, let's just reload the page or re-fetch session to be safe? 
-          // Or better, let's add a refreshSession method to AuthService.
-      }
+      this.username = this.newUsername.trim();
+      this.newUsername = '';
+      this.message = 'Username updated successfully';
     } catch (e: any) {
       this.error = e.message;
     } finally {
@@ -84,39 +77,68 @@ export class AccountInfo implements OnInit {
     }
 
     this.isLoading = true;
-    this.message = '';
-    this.error = '';
+    this.clearMessages();
 
     try {
-        // Supabase update password doesn't strictly require old password if you are logged in,
-        // but for security it's good practice. However, Supabase client API `updateUser` just takes new password.
-        // If we want to verify old password, we'd have to try to signIn with it first.
-        
-        if (this.oldPassword) {
-            const { error: signInError } = await supabase.auth.signInWithPassword({
-                email: this.email,
-                password: this.oldPassword
-            });
-            if (signInError) {
-                throw new Error('Incorrect old password');
-            }
-        }
-
-        const { error } = await supabase.auth.updateUser({
-            password: this.newPassword
+      if (this.oldPassword) {
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: this.email,
+          password: this.oldPassword
         });
+        if (signInError) {
+          throw new Error('Incorrect current password');
+        }
+      }
 
-        if (error) throw error;
+      const { error } = await supabase.auth.updateUser({
+        password: this.newPassword
+      });
 
-        this.message = 'Password updated successfully';
-        this.oldPassword = '';
-        this.newPassword = '';
-        this.confirmPassword = '';
+      if (error) throw error;
+
+      this.message = 'Password updated successfully';
+      this.resetPasswordFields();
     } catch (e: any) {
-        this.error = e.message;
+      this.error = e.message;
     } finally {
-        this.isLoading = false;
+      this.isLoading = false;
     }
+  }
+
+  resetPasswordFields() {
+    this.oldPassword = '';
+    this.newPassword = '';
+    this.confirmPassword = '';
+  }
+
+  showDeleteConfirmation() {
+    this.showDeleteModal = true;
+  }
+
+  cancelDelete() {
+    this.showDeleteModal = false;
+  }
+
+  async confirmDeleteAccount() {
+    this.isLoading = true;
+    this.clearMessages();
+
+    try {
+      // Note: Supabase client-side doesn't allow self-deletion by default
+      // This would need a server-side function or admin API
+      // For now, we'll show an error message
+      this.error = 'Account deletion requires contacting support. This feature is coming soon.';
+      this.showDeleteModal = false;
+    } catch (e: any) {
+      this.error = e.message;
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  clearMessages() {
+    this.message = '';
+    this.error = '';
   }
 
   goBack() {

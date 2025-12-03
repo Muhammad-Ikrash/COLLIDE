@@ -28,6 +28,9 @@ public class ProjectMembership {
     @Column(nullable = false)
     private Instant createdAt = Instant.now();
 
+    @Column(name = "local_folder_path")
+    private String localFolderPath;
+
     public ProjectMembership() {}
 
     public ProjectMembership(User user, Project project, Role role) {
@@ -49,4 +52,7 @@ public class ProjectMembership {
 
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+
+    public String getLocalFolderPath() { return localFolderPath; }
+    public void setLocalFolderPath(String localFolderPath) { this.localFolderPath = localFolderPath; }
 }

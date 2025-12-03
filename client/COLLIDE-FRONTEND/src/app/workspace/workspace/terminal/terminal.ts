@@ -19,7 +19,9 @@ export class TerminalComponent implements AfterViewInit, OnDestroy {
       cursorBlink: true,
       theme: { background: '#1e1e1e' },
       fontFamily: 'Consolas, "Courier New", monospace',
-      fontSize: 14
+      fontSize: 14,
+      scrollback: 1000,
+      scrollOnUserInput: true
     });
 
     this.fitAddon = new FitAddon();
@@ -39,7 +41,8 @@ export class TerminalComponent implements AfterViewInit, OnDestroy {
     api.startTerminal(this.terminalPath);
 
     api.onTerminalData((data: string) => {
-      this.term.write(data); 
+      this.term.write(data);
+      this.term.scrollToBottom();
     });
 
     this.term.onData((data) => {

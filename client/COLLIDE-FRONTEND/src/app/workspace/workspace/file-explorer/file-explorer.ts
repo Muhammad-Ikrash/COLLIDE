@@ -46,16 +46,18 @@ type TreeNode = {
   `,
   styles: [
     `
-    :host { display:block }
-    .node { display:flex; align-items:center; gap:6px; user-select:none; padding: 2px 0; cursor: pointer; }
-    .node:hover { background: rgba(255,255,255,0.05); }
-    .arrow { width:18px; display:inline-flex; justify-content:center; cursor:pointer; color: #888; }
-    .children { margin-left: 12px; border-left: 1px solid rgba(255,255,255,0.05); }
-    .context-menu { position: fixed; z-index: 2200; background: var(--bg-context, #222); color: var(--fg, #eee); border: 1px solid rgba(255,255,255,0.06); padding: 8px; border-radius: 6px; box-shadow: 0 6px 18px rgba(0,0,0,0.6); }
+    :host { display:block; color: #ffffff; }
+    .node { display:flex; align-items:center; gap:6px; user-select:none; padding: 4px 8px; cursor: pointer; color: #ffffff; border-radius: 4px; }
+    .node:hover { background: rgba(168, 85, 247, 0.15); }
+    .label { color: #ffffff; }
+    .icon { color: #b8b8b8; }
+    .arrow { width:18px; display:inline-flex; justify-content:center; cursor:pointer; color: #a855f7; }
+    .children { margin-left: 12px; border-left: 1px solid rgba(168, 85, 247, 0.3); }
+    .context-menu { position: fixed; z-index: 2200; background: #1e1a2e; color: #ffffff; border: 1px solid #a855f7; padding: 8px; border-radius: 6px; box-shadow: 0 6px 18px rgba(0,0,0,0.6), 0 0 15px rgba(168, 85, 247, 0.3); }
     .cm-actions { display:flex; flex-direction:column; gap:6px }
-    .cm-btn { background: transparent; color: inherit; border: 1px solid rgba(255,255,255,0.04); padding:6px 8px; border-radius:4px; cursor:pointer; text-align: left; }
-    .cm-btn:hover { background: rgba(255,255,255,0.1); }
-    .cm-rename input, .cm-create input { padding:6px; border-radius:4px; border:1px solid rgba(255,255,255,0.04); margin-bottom:6px; background: #333; color: white; }
+    .cm-btn { background: transparent; color: #ffffff; border: 1px solid rgba(168, 85, 247, 0.3); padding:6px 8px; border-radius:4px; cursor:pointer; text-align: left; }
+    .cm-btn:hover { background: rgba(168, 85, 247, 0.2); }
+    .cm-rename input, .cm-create input { padding:6px; border-radius:4px; border:1px solid rgba(168, 85, 247, 0.3); margin-bottom:6px; background: #1a1625; color: white; }
   `,
   ],
 })

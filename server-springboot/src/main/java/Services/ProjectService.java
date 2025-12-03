@@ -49,21 +49,56 @@ public class ProjectService {
         project.setLastModifiedAt(Instant.now());
         project = projectRepository.save(project);
         
-        // Add owner as ADMIN
+        // Add owner as ADMIN with the same local folder path
         ProjectMembership membership = new ProjectMembership(owner, project, Role.ADMIN);
+        membership.setLocalFolderPath(folderPath);
         membershipRepository.save(membership);
         
         return project;
     }
     
     /**
-     * Get all projects for a user (owned or member of)
+     * Get all projects for a user (owned or member of, excluding banned)
      */
     public List<Project> getUserProjects(Long userId) {
         List<ProjectMembership> memberships = membershipRepository.findByUserId(userId);
         return memberships.stream()
+            .filter(m -> m.getRole() != Role.BANNED)
             .map(ProjectMembership::getProject)
             .toList();
+    }
+
+    /**
+     * Get all memberships for a user (excluding banned)
+     */
+    public List<ProjectMembership> getUserMemberships(Long userId) {
+        List<ProjectMembership> memberships = membershipRepository.findByUserId(userId);
+        return memberships.stream()
+            .filter(m -> m.getRole() != Role.BANNED)
+            .toList();
+    }
+
+    /**
+     * Get user's membership for a specific project
+     */
+    public Optional<ProjectMembership> getUserMembership(Long userId, Long projectId) {
+        return membershipRepository.findByUserIdAndProjectId(userId, projectId);
+    }
+
+    /**
+     * Set local folder path for a user's project membership
+     */
+    @Transactional
+    public ProjectMembership setLocalFolderPath(Long userId, Long projectId, String localFolderPath) {
+        ProjectMembership membership = membershipRepository.findByUserIdAndProjectId(userId, projectId)
+            .orElseThrow(() -> new IllegalArgumentException("Membership not found"));
+        
+        if (membership.getRole() == Role.BANNED) {
+            throw new IllegalArgumentException("User is banned from this project");
+        }
+        
+        membership.setLocalFolderPath(localFolderPath);
+        return membershipRepository.save(membership);
     }
     
     /**
@@ -94,14 +129,21 @@ public class ProjectService {
         if (!projectRepository.existsById(projectId)) {
             throw new IllegalArgumentException("Project not found");
         }
+        
+        // Delete all memberships first (foreign key constraint)
+        List<ProjectMembership> memberships = membershipRepository.findByProjectId(projectId);
+        membershipRepository.deleteAll(memberships);
+        
+        // Now delete the project
         projectRepository.deleteById(projectId);
     }
     
     /**
-     * Check if user has access to project
+     * Check if user has access to project (not banned)
      */
     public boolean hasAccess(Long userId, Long projectId) {
-        return membershipRepository.findByUserIdAndProjectId(userId, projectId).isPresent();
+        Optional<ProjectMembership> membership = membershipRepository.findByUserIdAndProjectId(userId, projectId);
+        return membership.isPresent() && membership.get().getRole() != Role.BANNED;
     }
     
     /**

@@ -9,6 +9,8 @@ export interface Project {
   name: string;
   ownerId: number;
   folderPath: string;
+  localFolderPath?: string;
+  role?: string;
   createdAt: string;
   lastModifiedAt: string;
 }
@@ -20,6 +22,28 @@ export interface ProjectsResponse {
 export interface CreateProjectRequest {
   name: string;
   folderPath: string;
+}
+
+export interface ProjectMember {
+  id: number;
+  userId: number;
+  userName: string;
+  userEmail: string;
+  role: 'ADMIN' | 'CO_ADMIN' | 'CONTRIBUTOR' | 'VIEWER' | 'BANNED';
+  createdAt: string;
+}
+
+export interface MembersResponse {
+  members: ProjectMember[];
+}
+
+export interface AddMemberRequest {
+  email: string;
+  role: 'ADMIN' | 'CO_ADMIN' | 'CONTRIBUTOR' | 'VIEWER';
+}
+
+export interface UpdateRoleRequest {
+  role: 'ADMIN' | 'CO_ADMIN' | 'CONTRIBUTOR' | 'VIEWER' | 'BANNED';
 }
 
 @Injectable({
@@ -61,5 +85,45 @@ export class ProjectApiService {
    */
   deleteProject(id: number): Observable<void> {
     return this.http.delete<void>(`${API_BASE_URL}/api/projects/${id}`);
+  }
+
+  // ============ Project Members ============
+
+  /**
+   * Get all members of a project
+   */
+  getProjectMembers(projectId: number): Observable<MembersResponse> {
+    return this.http.get<MembersResponse>(`${API_BASE_URL}/api/projects/${projectId}/members`);
+  }
+
+  /**
+   * Add a member to a project
+   */
+  addProjectMember(projectId: number, request: AddMemberRequest): Observable<ProjectMember> {
+    return this.http.post<ProjectMember>(`${API_BASE_URL}/api/projects/${projectId}/members`, request);
+  }
+
+  /**
+   * Update a member's role
+   */
+  updateMemberRole(projectId: number, userId: number, request: UpdateRoleRequest): Observable<ProjectMember> {
+    return this.http.put<ProjectMember>(`${API_BASE_URL}/api/projects/${projectId}/members/${userId}`, request);
+  }
+
+  /**
+   * Remove a member from a project
+   */
+  removeMember(projectId: number, userId: number): Observable<void> {
+    return this.http.delete<void>(`${API_BASE_URL}/api/projects/${projectId}/members/${userId}`);
+  }
+
+  /**
+   * Set local folder path for the current user's project
+   */
+  setLocalFolderPath(projectId: number, localFolderPath: string): Observable<{ message: string; localFolderPath: string }> {
+    return this.http.put<{ message: string; localFolderPath: string }>(
+      `${API_BASE_URL}/api/projects/${projectId}/local-path`,
+      { localFolderPath }
+    );
   }
 }

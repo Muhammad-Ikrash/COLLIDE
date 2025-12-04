@@ -1,9 +1,10 @@
 import { Component, AfterViewInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { Subject, debounceTime, filter, merge, Subscription } from 'rxjs';
 import { changesDT } from './data.type';
-import { EditorComponent } from "ngx-monaco-editor-v2";
 import { FileExplorerService } from '../../../core/services/fileexplorer.service';
 import { CursorService } from '../../../core/services/cursor.service';
+
+declare const monaco: any;
 
 // change tracking queue (kept separate)
 let changesQueue: changesDT[] = [];
@@ -17,7 +18,7 @@ const FlagForUpdateSend = (character: string): boolean => {
 
 @Component({
   selector: 'app-ide-editor',
-  imports: [EditorComponent],
+  imports: [],
   templateUrl: './ide-editor.html',
   styleUrls: ['./ide-editor.scss'],
 })
@@ -25,7 +26,7 @@ export class IdeEditor implements AfterViewInit, OnDestroy {
   @ViewChild('editorContainer', { static: false }) editorContainer!: ElementRef<HTMLDivElement>;
 
   // monaco variables
-  private monaco: any;
+  private monacoInstance: any;
   private editorInstance: any;
 
   code = `function hello() {\n  console.log('Hello from Monaco!');\n}`;
@@ -39,32 +40,30 @@ export class IdeEditor implements AfterViewInit, OnDestroy {
 
   constructor(private fes: FileExplorerService, private cursorService: CursorService) {}
 
+
+  private getLanguageFromPath(filePath: string): string {
+    if (!filePath) return 'plaintext';
+    
+    const ext = filePath.substring(filePath.lastIndexOf('.')).toLowerCase();
+    
+    switch (ext) {
+      case '.cpp':
+      case '.c':
+        return 'cpp';
+      case '.txt':
+      default:
+        return 'plaintext';
+    }
+  }
+
   async ngAfterViewInit(): Promise<void> {
     try {
-      this.monaco = await import('monaco-editor');
+      // Load Monaco from assets using AMD loader
+      this.monacoInstance = await this.loadMonaco();
 
-      // to handle worker URLs correctly
-      (self as any).MonacoEnvironment = {
-        getWorkerUrl: function (moduleId: any, label: string) {
-          if (label === 'json') {
-            return './assets/monaco/vs/language/json/json.worker.js';
-          }
-          if (label === 'css' || label === 'scss' || label === 'less') {
-            return './assets/monaco/vs/language/css/css.worker.js';
-          }
-          if (label === 'html' || label === 'handlebars' || label === 'razor') {
-            return './assets/monaco/vs/language/html/html.worker.js';
-          }
-          if (label === 'typescript' || label === 'javascript') {
-            return './assets/monaco/vs/language/typescript/ts.worker.js';
-          }
-          return './assets/monaco/vs/editor/editor.worker.js';
-        },
-      };
-
-      this.editorInstance = this.monaco.editor.create(this.editorContainer.nativeElement, {
+      this.editorInstance = this.monacoInstance.editor.create(this.editorContainer.nativeElement, {
         value: this.code,
-        language: 'typescript',
+        language: 'plaintext',
         theme: 'vs-dark',
         automaticLayout: true,
         minimap: { enabled: true },
@@ -120,11 +119,81 @@ export class IdeEditor implements AfterViewInit, OnDestroy {
             if (model && typeof model.setValue === 'function') model.setValue(f.content);
             else this.editorInstance.setValue(f.content);
           }
+          // Update language based on file extension
+          const language = this.getLanguageFromPath(f.path);
+          const currentModel = this.editorInstance.getModel();
+          if (currentModel) {
+            this.monacoInstance.editor.setModelLanguage(currentModel, language);
+          }
         }
       } else {
         this.activePath = null;
       }
     }));
+  }
+
+  /**
+   * Load Monaco Editor from assets using AMD loader
+   * This approach works for both dev server and file:// protocol
+   */
+  private loadMonaco(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      // Check if monaco is already loaded
+      if (typeof (window as any).monaco !== 'undefined') {
+        resolve((window as any).monaco);
+        return;
+      }
+
+      // Determine base path based on protocol
+      const isFileProtocol = window.location.protocol === 'file:';
+      let basePath: string;
+      
+      if (isFileProtocol) {
+        // For file:// protocol, compute path relative to the HTML file
+        // Remove hash and query string first
+        let href = window.location.href.split('#')[0].split('?')[0];
+        const lastSlash = href.lastIndexOf('/');
+        const baseDir = href.substring(0, lastSlash);
+        basePath = `${baseDir}/assets/monaco`;
+      } else {
+        basePath = '/assets/monaco';
+      }
+
+      console.log('[Monaco] Loading from:', basePath);
+
+      // Configure Monaco environment for workers
+      (window as any).MonacoEnvironment = {
+        getWorker: function (_moduleId: any, label: string) {
+          // Use inline workers for file:// protocol to avoid CORS issues
+          return new Worker(URL.createObjectURL(new Blob([`
+            self.MonacoEnvironment = { baseUrl: '${basePath}/' };
+            importScripts('${basePath}/vs/base/worker/workerMain.js');
+          `], { type: 'application/javascript' })));
+        }
+      };
+
+      // Load the AMD loader
+      const loaderScript = document.createElement('script');
+      loaderScript.src = `${basePath}/vs/loader.js`;
+      loaderScript.onload = () => {
+        // Configure require
+        const require = (window as any).require;
+        require.config({
+          paths: { 'vs': `${basePath}/vs` }
+        });
+
+        // Load monaco
+        require(['vs/editor/editor.main'], () => {
+          resolve((window as any).monaco);
+        }, (err: any) => {
+          reject(err);
+        });
+      };
+      loaderScript.onerror = (err) => {
+        reject(new Error('Failed to load Monaco loader script'));
+      };
+      document.head.appendChild(loaderScript);
+    });
   }
 
   ngOnDestroy(): void {

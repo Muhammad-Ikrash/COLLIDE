@@ -11,6 +11,18 @@
       <span class="workspace-name">{{ project?.name || 'Workspace' }}</span>
     </div>
     <div class="title-bar-right">
+      <!-- Collaborative Files Button -->
+      <button
+        class="title-bar-btn"
+        [class.active]="showCollabFilesModal"
+        (click)="openCollabFilesModal()"
+        title="Collaborative Files"
+      >
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V6h5.17l2 2H20v10zm-8.5-5.5v-3h-3v-2h3v-3h2v3h3v2h-3v3h-2z"/>
+        </svg>
+      </button>
+      <!-- Collaborators Button -->
       <button
         class="title-bar-btn"
         [class.active]="showCollaboratorsPopup"
@@ -636,3 +648,132 @@
   </div>
 </div>
 }
+
+<!-- Collaborative Files Selection Modal -->
+@if (showCollabFilesModal) {
+<div class="modal-overlay" (click)="closeCollabFilesModal()">
+  <div class="collab-files-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+          <path d="M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V6h5.17l2 2H20v10zm-8.5-5.5v-3h-3v-2h3v-3h2v3h3v2h-3v3h-2z"/>
+        </svg>
+        Select Collaborative Files
+      </h2>
+      <button class="modal-close-btn" (click)="closeCollabFilesModal()">
+        <svg viewBox="0 0 16 16" fill="currentColor">
+          <path d="M8 8.707l3.646 3.647.708-.707L8.707 8l3.647-3.646-.707-.708L8 7.293 4.354 3.646l-.707.708L7.293 8l-3.646 3.646.707.708L8 8.707z"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="collab-info-banner">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+        </svg>
+        <p>Select files and folders that will be shared with all project collaborators. Selected items will sync in real-time.</p>
+      </div>
+
+      <div class="collab-file-tree">
+        @if (isLoadingCollabTree) {
+          <div class="loading-tree">
+            <div class="spinner-small"></div>
+            <span>Loading file tree...</span>
+          </div>
+        } @else if (collabFileTree.length === 0) {
+          <div class="empty-tree">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="48" height="48">
+              <path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/>
+            </svg>
+            <p>No files found in project folder</p>
+          </div>
+        } @else {
+          <div class="file-tree-container">
+            <ng-container *ngTemplateOutlet="fileTreeTemplate; context: { nodes: collabFileTree, level: 0 }"></ng-container>
+          </div>
+        }
+      </div>
+
+      <div class="selected-count">
+        <span class="count-badge">{{ selectedCollabFiles.size }}</span> files/folders selected for collaboration
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="cancel-btn" (click)="closeCollabFilesModal()" [disabled]="isSavingCollabFiles">Cancel</button>
+      <button class="confirm-btn" (click)="confirmCollabFiles()" [disabled]="selectedCollabFiles.size === 0 || isSavingCollabFiles">
+        @if (isSavingCollabFiles) {
+          <span class="spinner"></span>
+          Saving...
+        } @else {
+          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+          </svg>
+          Confirm Selection
+        }
+      </button>
+    </div>
+  </div>
+</div>
+}
+
+<!-- File Tree Recursive Template -->
+<ng-template #fileTreeTemplate let-nodes="nodes" let-level="level">
+  @for (node of nodes; track node.id) {
+    <div class="collab-tree-item" [style.paddingLeft.px]="level * 16 + 8">
+      <div class="item-row" [class.selected]="selectedCollabFiles.has(node.path)">
+        <!-- Expand/Collapse for folders -->
+        @if (node.type === 'folder') {
+          <button class="expand-btn" (click)="expandCollabFolder(node)">
+            <svg viewBox="0 0 16 16" fill="currentColor" [class.expanded]="node.isExpanded">
+              <path d="M5.7 13.7L5 13l4.6-4.6L5 3.7l.7-.7 5.3 5.4-5.3 5.3z"/>
+            </svg>
+          </button>
+        } @else {
+          <span class="expand-placeholder"></span>
+        }
+        
+        <!-- Checkbox -->
+        <label class="checkbox-container">
+          <input 
+            type="checkbox" 
+            [checked]="selectedCollabFiles.has(node.path)"
+            (change)="toggleCollabFileSelection(node)"
+          />
+          <span class="checkmark"></span>
+        </label>
+        
+        <!-- Icon -->
+        <span class="item-icon">
+          @if (node.type === 'folder') {
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+            </svg>
+          } @else {
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/>
+            </svg>
+          }
+        </span>
+        
+        <!-- Name -->
+        <span class="item-name" (click)="toggleCollabFileSelection(node)">{{ node.name }}</span>
+        
+        <!-- Select all button for folders -->
+        @if (node.type === 'folder' && node.children && node.children.length > 0) {
+          <button class="select-all-btn" (click)="selectAllInFolder(node)" title="Select all in folder">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z"/>
+            </svg>
+          </button>
+        }
+      </div>
+      
+      <!-- Children -->
+      @if (node.type === 'folder' && node.isExpanded && node.children) {
+        <ng-container *ngTemplateOutlet="fileTreeTemplate; context: { nodes: node.children, level: level + 1 }"></ng-container>
+      }
+    </div>
+  }
+</ng-template>

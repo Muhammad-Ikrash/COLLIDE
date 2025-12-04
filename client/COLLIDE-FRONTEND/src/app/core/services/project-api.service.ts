@@ -47,6 +47,30 @@ export interface UpdateRoleRequest {
   role: 'ADMIN' | 'CO_ADMIN' | 'CONTRIBUTOR' | 'VIEWER' | 'BANNED';
 }
 
+export interface CollaborativeFile {
+  id: number;
+  filename: string;
+  path: string;
+  isDirectory: boolean;
+  addedBy: number;
+  addedByName: string;
+  createdAt: string;
+}
+
+export interface CollaborativeFilesResponse {
+  files: CollaborativeFile[];
+}
+
+export interface FileSelection {
+  path: string;
+  filename: string;
+  isDirectory: boolean;
+}
+
+export interface SetCollaborativeFilesRequest {
+  files: FileSelection[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -125,6 +149,49 @@ export class ProjectApiService {
     return this.http.put<{ message: string; localFolderPath: string }>(
       `${API_BASE_URL}/api/projects/${projectId}/local-path`,
       { localFolderPath }
+    );
+  }
+
+  // ============ Collaborative Files ============
+
+  /**
+   * Get all collaborative files for a project
+   */
+  getCollaborativeFiles(projectId: number): Observable<CollaborativeFilesResponse> {
+    return this.http.get<CollaborativeFilesResponse>(`${API_BASE_URL}/api/projects/${projectId}/files`);
+  }
+
+  /**
+   * Set collaborative files for a project (bulk update)
+   */
+  setCollaborativeFiles(projectId: number, request: SetCollaborativeFilesRequest): Observable<{ message: string; files: CollaborativeFile[] }> {
+    return this.http.put<{ message: string; files: CollaborativeFile[] }>(
+      `${API_BASE_URL}/api/projects/${projectId}/files`,
+      request
+    );
+  }
+
+  /**
+   * Add a single collaborative file
+   */
+  addCollaborativeFile(projectId: number, file: FileSelection): Observable<CollaborativeFile> {
+    return this.http.post<CollaborativeFile>(`${API_BASE_URL}/api/projects/${projectId}/files`, file);
+  }
+
+  /**
+   * Remove a collaborative file
+   */
+  removeCollaborativeFile(projectId: number, fileId: number): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${API_BASE_URL}/api/projects/${projectId}/files/${fileId}`);
+  }
+
+  /**
+   * Check if a file is marked as collaborative
+   */
+  checkCollaborativeFile(projectId: number, path: string): Observable<{ isCollaborative: boolean; path: string }> {
+    return this.http.get<{ isCollaborative: boolean; path: string }>(
+      `${API_BASE_URL}/api/projects/${projectId}/files/check`,
+      { params: { path } }
     );
   }
 }

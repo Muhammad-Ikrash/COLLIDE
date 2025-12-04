@@ -7,7 +7,17 @@ import { WorkspaceHeader } from './workspace-header/workspace-header';
 import { IdeFooter } from './ide-footer/ide-footer';
 import { TerminalComponent } from './terminal/terminal';
 import { ChatSidebar } from './chat-sidebar/chat-sidebar';
-import { ProjectApiService, Project, ProjectMember } from '../../core/services/project-api.service';
+import { ProjectApiService, Project, ProjectMember, CollaborativeFile, FileSelection } from '../../core/services/project-api.service';
+
+export interface CollabFileNode {
+  id: string;
+  name: string;
+  path: string;
+  type: 'file' | 'folder';
+  children?: CollabFileNode[];
+  isExpanded?: boolean;
+  isSelected?: boolean;
+}
 import { FileExplorerService } from '../../core/services/fileexplorer.service';
 import { ChatService } from '../../core/services/chat.service';
 import { CommonModule } from '@angular/common';
@@ -72,6 +82,14 @@ export class Workspace implements OnInit, OnDestroy {
   showFolderPrompt = false;
   selectedLocalPath = '';
   isSharedProject = false;
+
+  // Collaborative files modal state
+  showCollabFilesModal = false;
+  collabFileTree: CollabFileNode[] = [];
+  selectedCollabFiles: Set<string> = new Set();
+  isLoadingCollabTree = false;
+  existingCollabFiles: CollaborativeFile[] = [];
+  isSavingCollabFiles = false;
 
   // Track if any files are open
   hasOpenFiles = false;
@@ -411,6 +429,154 @@ export class Workspace implements OnInit, OnDestroy {
 
   getMembersByRole(role: string): ProjectMember[] {
     return this.members.filter(m => m.role === role);
+  }
+
+  // Collaborative Files Methods
+  openCollabFilesModal(): void {
+    this.showCollabFilesModal = true;
+    this.selectedCollabFiles.clear();
+    this.existingCollabFiles = [];
+    this.loadExistingCollabFiles();
+    this.loadCollabFileTree();
+  }
+
+  private loadExistingCollabFiles(): void {
+    if (!this.project) return;
+    
+    this.projectApi.getCollaborativeFiles(this.project.id).subscribe({
+      next: (response) => {
+        this.existingCollabFiles = response.files;
+        // Pre-select existing collaborative files
+        response.files.forEach(file => {
+          this.selectedCollabFiles.add(file.path);
+        });
+        // Update tree selection state if tree is already loaded
+        this.updateTreeSelectionState(this.collabFileTree);
+      },
+      error: (err) => {
+        console.error('Failed to load existing collaborative files:', err);
+      }
+    });
+  }
+
+  private updateTreeSelectionState(nodes: CollabFileNode[]): void {
+    nodes.forEach(node => {
+      node.isSelected = this.selectedCollabFiles.has(node.path);
+      if (node.children && node.children.length > 0) {
+        this.updateTreeSelectionState(node.children);
+      }
+    });
+  }
+
+  closeCollabFilesModal(): void {
+    this.showCollabFilesModal = false;
+    this.selectedCollabFiles.clear();
+  }
+
+  async loadCollabFileTree(): Promise<void> {
+    if (!this.projectRootPath) return;
+    
+    this.isLoadingCollabTree = true;
+    try {
+      const items = await this.fileExplorerService.getTree(this.projectRootPath);
+      this.collabFileTree = this.mapToCollabNodes(items, this.projectRootPath);
+    } catch (err) {
+      console.error('Failed to load file tree:', err);
+    } finally {
+      this.isLoadingCollabTree = false;
+    }
+  }
+
+  private mapToCollabNodes(items: any[], parentPath: string): CollabFileNode[] {
+    return items.map(item => ({
+      id: item.path,
+      name: item.name,
+      path: item.path,
+      type: item.type as 'file' | 'folder',
+      isExpanded: false,
+      isSelected: this.selectedCollabFiles.has(item.path),
+      children: []
+    }));
+  }
+
+  async expandCollabFolder(node: CollabFileNode): Promise<void> {
+    if (node.type !== 'folder') return;
+    
+    node.isExpanded = !node.isExpanded;
+    
+    if (node.isExpanded && (!node.children || node.children.length === 0)) {
+      try {
+        const items = await this.fileExplorerService.getTree(node.path);
+        node.children = this.mapToCollabNodes(items, node.path);
+      } catch (err) {
+        console.error('Failed to expand folder:', err);
+      }
+    }
+  }
+
+  toggleCollabFileSelection(node: CollabFileNode): void {
+    if (this.selectedCollabFiles.has(node.path)) {
+      this.selectedCollabFiles.delete(node.path);
+      node.isSelected = false;
+    } else {
+      this.selectedCollabFiles.add(node.path);
+      node.isSelected = true;
+    }
+  }
+
+  selectAllInFolder(node: CollabFileNode): void {
+    if (node.type !== 'folder' || !node.children) return;
+    
+    const selectRecursive = (n: CollabFileNode) => {
+      this.selectedCollabFiles.add(n.path);
+      n.isSelected = true;
+      if (n.children) {
+        n.children.forEach(child => selectRecursive(child));
+      }
+    };
+    
+    selectRecursive(node);
+  }
+
+  confirmCollabFiles(): void {
+    if (!this.project) return;
+    
+    this.isSavingCollabFiles = true;
+    
+    // Build the file selection list from selected paths
+    const files: FileSelection[] = [];
+    
+    // Helper to collect file info from tree
+    const collectFileInfo = (nodes: CollabFileNode[]) => {
+      nodes.forEach(node => {
+        if (this.selectedCollabFiles.has(node.path)) {
+          files.push({
+            path: node.path,
+            filename: node.name,
+            isDirectory: node.type === 'folder'
+          });
+        }
+        if (node.children && node.children.length > 0) {
+          collectFileInfo(node.children);
+        }
+      });
+    };
+    
+    collectFileInfo(this.collabFileTree);
+    
+    this.projectApi.setCollaborativeFiles(this.project.id, { files }).subscribe({
+      next: (response) => {
+        console.log('Collaborative files saved:', response);
+        this.existingCollabFiles = response.files;
+        this.isSavingCollabFiles = false;
+        this.closeCollabFilesModal();
+      },
+      error: (err) => {
+        console.error('Failed to save collaborative files:', err);
+        this.isSavingCollabFiles = false;
+        alert('Failed to save collaborative files: ' + (err.error?.error || err.message));
+      }
+    });
   }
 
   canManageMembers(): boolean {

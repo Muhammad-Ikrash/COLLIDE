@@ -54,11 +54,17 @@ export class FileExplorerService {
   async getTree(path: string) {
     if (!window.electronAPI) return [];
     const items = await window.electronAPI.readDirectory(path);
-    // Sort folders first, then files
-    return items.sort((a, b) => {
-      if (a.type === b.type) return a.name.localeCompare(b.name);
-      return a.type === 'folder' ? -1 : 1;
-    });
+    // Sort folders first, then files, and ensure each item has an id
+    return items
+      .map(item => ({
+        ...item,
+        id: item.path, // Use path as unique id
+        children: item.type === 'folder' ? [] : undefined
+      }))
+      .sort((a, b) => {
+        if (a.type === b.type) return a.name.localeCompare(b.name);
+        return a.type === 'folder' ? -1 : 1;
+      });
   }
 
   async openFile(path: string, name?: string) {

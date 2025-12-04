@@ -1515,3 +1515,387 @@ $neon-purple-soft: rgba(168, 85, 247, 0.3);
         }
     }
 }
+
+// Collaborative Files Modal
+.collab-files-modal {
+    width: 650px;
+    max-width: 95vw;
+    max-height: 85vh;
+    background-color: #1e1a2e;
+    border: 1px solid $border-color;
+    border-radius: 12px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5), 0 0 30px rgba($neon-purple, 0.15);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+
+    .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        background-color: #252030;
+        border-bottom: 1px solid $border-color;
+
+        h2 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            color: $text-primary;
+            margin: 0;
+
+            svg {
+                fill: $neon-purple;
+            }
+        }
+
+        .modal-close-btn {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            border-radius: 6px;
+
+            svg {
+                width: 16px;
+                height: 16px;
+                fill: $icon-color;
+            }
+
+            &:hover {
+                background-color: rgba($accent-color, 0.15);
+
+                svg {
+                    fill: $accent-color;
+                }
+            }
+        }
+    }
+
+    .modal-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        padding: 16px 20px;
+        background-color: #252030;
+        border-top: 1px solid $border-color;
+
+        .cancel-btn, .confirm-btn {
+            padding: 10px 20px;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cancel-btn {
+            background: transparent;
+            border: 1px solid $border-color;
+            color: $text-secondary;
+
+            &:hover {
+                background-color: rgba(255, 255, 255, 0.05);
+                color: $text-primary;
+            }
+        }
+
+        .confirm-btn {
+            background: linear-gradient(135deg, $neon-purple 0%, #9333ea 100%);
+            border: none;
+            color: white;
+
+            svg {
+                width: 16px;
+                height: 16px;
+                fill: currentColor;
+            }
+
+            .spinner {
+                width: 14px;
+                height: 14px;
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                border-top-color: white;
+                border-radius: 50%;
+                animation: spin 0.8s linear infinite;
+            }
+
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
+
+            &:hover:not(:disabled) {
+                background: linear-gradient(135deg, #b066f9 0%, #a855f7 100%);
+                box-shadow: 0 0 15px $neon-purple-glow;
+            }
+
+            &:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+        }
+    }
+}
+
+.collab-info-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, rgba($neon-purple, 0.1) 0%, rgba(147, 51, 234, 0.05) 100%);
+    border: 1px solid rgba($neon-purple, 0.3);
+    border-radius: 8px;
+
+    svg {
+        fill: $neon-purple;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    p {
+        margin: 0;
+        font-size: 13px;
+        color: $text-secondary;
+        line-height: 1.5;
+    }
+}
+
+.collab-file-tree {
+    flex: 1;
+    min-height: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+    background-color: #1a1625;
+    border: 1px solid $border-color;
+    border-radius: 8px;
+}
+
+.file-tree-container {
+    padding: 8px 0;
+}
+
+.loading-tree, .empty-tree {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: $text-secondary;
+    gap: 12px;
+
+    svg {
+        fill: rgba($neon-purple, 0.3);
+    }
+
+    .spinner-small {
+        width: 24px;
+        height: 24px;
+        border: 3px solid rgba($neon-purple, 0.2);
+        border-top-color: $neon-purple;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+}
+
+.collab-tree-item {
+    .item-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: background-color 0.1s ease;
+
+        &:hover {
+            background-color: rgba($neon-purple, 0.1);
+        }
+
+        &.selected {
+            background-color: rgba($neon-purple, 0.15);
+            
+            .item-name {
+                color: $text-primary;
+            }
+        }
+    }
+
+    .expand-btn {
+        width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+
+        svg {
+            width: 12px;
+            height: 12px;
+            fill: $text-secondary;
+            transition: transform 0.15s ease;
+
+            &.expanded {
+                transform: rotate(90deg);
+            }
+        }
+
+        &:hover svg {
+            fill: $neon-purple;
+        }
+    }
+
+    .expand-placeholder {
+        width: 18px;
+        height: 18px;
+    }
+
+    .checkbox-container {
+        position: relative;
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+
+        input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 18px;
+            width: 18px;
+            background-color: transparent;
+            border: 2px solid $border-color;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+
+            &::after {
+                content: "";
+                position: absolute;
+                display: none;
+                left: 5px;
+                top: 2px;
+                width: 4px;
+                height: 8px;
+                border: solid white;
+                border-width: 0 2px 2px 0;
+                transform: rotate(45deg);
+            }
+        }
+
+        &:hover .checkmark {
+            border-color: $neon-purple;
+        }
+
+        input:checked ~ .checkmark {
+            background-color: $neon-purple;
+            border-color: $neon-purple;
+
+            &::after {
+                display: block;
+            }
+        }
+    }
+
+    .item-icon {
+        width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        svg {
+            width: 16px;
+            height: 16px;
+            fill: $icon-color;
+        }
+    }
+
+    .item-name {
+        flex: 1;
+        font-size: 13px;
+        color: $text-secondary;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .select-all-btn {
+        width: 22px;
+        height: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        border-radius: 4px;
+        opacity: 0;
+        transition: all 0.15s ease;
+
+        svg {
+            width: 14px;
+            height: 14px;
+            fill: $text-secondary;
+        }
+
+        &:hover {
+            background-color: rgba($neon-purple, 0.2);
+            svg {
+                fill: $neon-purple;
+            }
+        }
+    }
+
+    .item-row:hover .select-all-btn {
+        opacity: 1;
+    }
+}
+
+.selected-count {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: $text-secondary;
+
+    .count-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 24px;
+        height: 24px;
+        padding: 0 8px;
+        background: linear-gradient(135deg, $neon-purple 0%, #9333ea 100%);
+        color: white;
+        font-weight: 600;
+        font-size: 12px;
+        border-radius: 12px;
+    }
+}

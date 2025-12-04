@@ -1,31 +1,15 @@
 @echo off
-echo ========================================
-echo   COLLIDE - Starting Development Mode
-echo ========================================
+echo Starting COLLIDE Development Environment...
 echo.
 
-cd /d "%~dp0"
+echo [1/2] Starting Angular dev server...
+start "Angular Server" cmd /k "cd COLLIDE-FRONTEND && npm start"
 
-:: Check if node_modules exists
-if not exist "node_modules" (
-    echo Installing dependencies...
-    call npm install
-)
-
-:: Check if Angular node_modules exists
-if not exist "COLLIDE-FRONTEND\node_modules" (
-    echo Installing Angular dependencies...
-    cd COLLIDE-FRONTEND
-    call npm install
-    cd ..
-)
-
-echo Starting COLLIDE...
-echo (The app will automatically start the Angular server)
 echo.
+echo Waiting for Angular to start on port 4200...
+timeout /t 15 /nobreak >nul
 
-:: Start Electron which will handle Angular
-call npm run dev
-
-pause
+echo.
+echo [2/2] Starting Electron...
+call npx electron ./Electron/main.js
 

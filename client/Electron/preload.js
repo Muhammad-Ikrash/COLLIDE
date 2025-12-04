@@ -9,6 +9,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     createFolder: (parent, name) => ipcRenderer.invoke('fs:createFolder', parent, name),
     deletePath: (path) => ipcRenderer.invoke('fs:delete', path),
     renamePath: (oldPath, newPath) => ipcRenderer.invoke('fs:rename', oldPath, newPath),
+    
     startTerminal: (cwd) => ipcRenderer.send('terminal-start', cwd),
     onTerminalData: (callback) => ipcRenderer.on('terminal-data', (event, data) => callback(data)),
     sendTerminalInput: (input) => ipcRenderer.send('terminal-input', input),

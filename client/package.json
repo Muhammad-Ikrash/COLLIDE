@@ -38,23 +38,13 @@
 
     "test": "echo \"Error: no test specified\" && exit 1",
 
-    "start": "electron ./Electron/main.js",
-
-    "start:dev": "electron ./Electron/main.js --dev",
-
-    "build": "cd COLLIDE-FRONTEND && npm run build",
-
     "electron-start": "electron ./Electron/main.js",
 
-    "angular-start": "cd COLLIDE-FRONTEND && npx ng serve",
-
-    "angular-only": "cd COLLIDE-FRONTEND && npx ng serve --port 4200",
+    "angular-start": "cd COLLIDE-FRONTEND && \"C:\\Program Files\\nodejs\\node.exe\" ./node_modules/@angular/cli/bin/ng.js serve",
 
     "dev:electron": "npx wait-on http://localhost:4200 && npx electron ./Electron/main.js",
 
-    "dev:start": "node_modules\\.bin\\concurrently.cmd \"npm run angular-start\" \"npm run dev:electron\"",
-
-    "dev": "electron ./Electron/main.js --dev"
+    "dev:start": "node_modules\\.bin\\concurrently.cmd \"npm run angular-start\" \"npm run dev:electron\""
 
   },
 
@@ -67,3 +57,4 @@
   "type": "module"
 
 }
+

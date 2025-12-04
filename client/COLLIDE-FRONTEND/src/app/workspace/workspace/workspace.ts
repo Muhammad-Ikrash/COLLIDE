@@ -20,6 +20,7 @@ export interface CollabFileNode {
 }
 import { FileExplorerService } from '../../core/services/fileexplorer.service';
 import { ChatService } from '../../core/services/chat.service';
+import { CursorService } from '../../core/services/cursor.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -40,12 +41,17 @@ export class Workspace implements OnInit, OnDestroy {
   private projectApi = inject(ProjectApiService);
   private fileExplorerService = inject(FileExplorerService);
   private chatService = inject(ChatService);
+  private cursorService = inject(CursorService);
 
   projectId: string | null = null;
   project: Project | null = null;
   projectRootPath: string | null = null;
   isLoading = true;
   error: string | null = null;
+
+  // Cursor position for status bar
+  cursorLine = 1;
+  cursorColumn = 1;
 
   // Panel visibility state
   showFileExplorer = true;
@@ -103,6 +109,14 @@ export class Workspace implements OnInit, OnDestroy {
     this.fileExplorerService.openedFiles$.subscribe(files => {
       this.hasOpenFiles = files.length > 0;
     });
+
+    // Subscribe to cursor position changes for status bar
+    this.subscriptions.push(
+      this.cursorService.pos$.subscribe(pos => {
+        this.cursorLine = pos.line;
+        this.cursorColumn = pos.column;
+      })
+    );
 
     // Subscribe to chat unread count
     this.subscriptions.push(

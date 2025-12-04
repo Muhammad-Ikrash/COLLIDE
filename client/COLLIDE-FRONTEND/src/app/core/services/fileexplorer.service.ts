@@ -169,7 +169,7 @@ export class FileExplorerService {
 
   async createInParent(parent: string, name: string) {
     if (!window.electronAPI) return;
-    // Simple heuristic: if it has a dot, it's a file.
+    
     if (name.includes('.')) {
       return await window.electronAPI.createFile(parent, name);
     } else {
